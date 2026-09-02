@@ -76,7 +76,7 @@ async function runBrowser(browserType, name) {
     await host.locator('.big-code').waitFor({ state: 'visible' });
     const code = (await host.locator('.big-code').textContent()).trim();
     assert.match(code, /^[A-Z2-9]{5}$/);
-    assert.equal(await host.locator('.cat-toggle').count(), 12, `${name}: expected 12 category buttons`);
+    assert.equal(await host.locator('.cat-toggle').count(), 13, `${name}: expected 13 category buttons`);
     await assertNoHorizontalOverflow(host, `${name} host lobby`);
 
     // Second phone joins and receives the same room state.
@@ -93,7 +93,7 @@ async function runBrowser(browserType, name) {
     await guest.locator('#join').click();
     await guest.locator('.big-code').waitFor({ state: 'visible' });
     await guest.locator('.pname', { hasText: 'MobileHost' }).waitFor({ state: 'visible' });
-    assert.equal(await guest.locator('.cat-view').count(), 12, `${name}: guest should see 12 read-only categories`);
+    assert.equal(await guest.locator('.cat-view').count(), 13, `${name}: guest should see 13 read-only categories`);
     await assertNoHorizontalOverflow(guest, `${name} guest lobby`);
 
     // Select only estimates from the UI. Re-render after every toggle is intentional.
