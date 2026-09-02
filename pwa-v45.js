@@ -30,12 +30,39 @@ const icon = `<?xml version="1.0" encoding="UTF-8"?>
 </svg>`;
 
 const sw = `'use strict';
-const CACHE='sueffiq-shell-v1';
-self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.add('/')).catch(()=>{}));});
-self.addEventListener('activate',event=>{event.waitUntil(Promise.all([self.clients.claim(),caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))))]));});
+const CACHE='sueffiq-shell-v2';
+const SHELL='/';
+self.addEventListener('install',event=>{
+  self.skipWaiting();
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    try{
+      const response=await fetch(SHELL,{cache:'reload'});
+      if(response&&response.ok)await cache.put(SHELL,response.clone());
+    }catch(e){}
+  })());
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||event.request.mode!=='navigate')return;
-  event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put('/',copy)).catch(()=>{});return response;}).catch(()=>caches.match('/')));
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    const cached=await cache.match(SHELL);
+    try{
+      const response=await fetch(event.request);
+      if(response&&response.ok)event.waitUntil(cache.put(SHELL,response.clone()).catch(()=>{}));
+      return response;
+    }catch(e){
+      if(cached)return cached;
+      return new Response('<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0d0914"><title>SüffIQ</title></head><body style="margin:0;background:#0d0914;color:#fff;font-family:system-ui;padding:30px;text-align:center"><h1>SüffIQ</h1><p>Offline-Shell wird vorbereitet. Sobald kurz Internet da ist, steht die Startseite danach auch offline bereit.</p></body></html>',{status:200,headers:{'content-type':'text/html; charset=utf-8'}});
+    }
+  })());
 });`;
 
 module.exports = function pwaHandler(req, res) {
