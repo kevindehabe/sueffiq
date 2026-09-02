@@ -13,7 +13,7 @@ function replaceRequired(source, needle, replacement, label) {
 src = replaceRequired(
   src,
   "const addMinigameFrontend = require('./frontend-minigames-v47');",
-  "const addMinigameFrontend = require('./frontend-minigames-v471');",
+  "const addMinigameFrontend = require('./frontend-draw-timing-v47');",
   'Frontend-Modul'
 );
 
