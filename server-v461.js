@@ -12,6 +12,7 @@ function patch(source, needle, replacement, label) {
 const basePath = path.join(__dirname, 'server-v46.js');
 let src = fs.readFileSync(basePath, 'utf8');
 
+src = patch(src, "const VERSION = '4.6.0';", "const VERSION = '4.6.1';", 'version');
 src = patch(src,
   "const addMinigameFrontend = require('./frontend-minigames-v46b');",
   "const addMinigameFrontend = require('./frontend-minigames-v461');",
