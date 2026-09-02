@@ -1,4 +1,18 @@
-# CHANGES – SüffIQ v2
+# CHANGES – SüffIQ
+
+## v3.0.0
+
+- Neuer 18+-Fragenmix mit deutlich frecheren „Ich hab noch nie“, Wahl-, Wahrheit- und Pflichtkarten ergänzt.
+- Weitere Schätzfragen ergänzt.
+- 4-Antwort-Quiz massiv erweitert, inklusive Sport, Popkultur, Gaming und Musik.
+- Neue Bildrunde „Wer ist das?“ ergänzt.
+- Die Bildrunde lädt bekannte Personen über Wikipedia/Wikimedia und startet stark verschwommen.
+- Das Bild wird innerhalb der Runde automatisch in fünf Stufen immer schärfer.
+- Richtige Bild-Tipps bleiben geheim, „nah dran“ bleibt privat, klar falsche Tipps werden live für alle angezeigt.
+- Frühes Erkennen wird belohnt; spätes oder fehlendes Erkennen führt zu mehr Schlücken.
+- Neue mobile v3-Oberfläche ergänzt.
+- Render startet jetzt über `server-v3.js`.
+- Der bisherige v2-Server und die v2-Oberfläche bleiben im Repository als Rückfallebene erhalten.
 
 ## v2.0.0
 
