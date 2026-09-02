@@ -60,7 +60,7 @@ async function runBrowser(browserType, name) {
     await guest.locator('#code').fill(code);
     await guest.locator('#join').click();
     await guest.locator('.big-code').waitFor({ state: 'visible' });
-    await guest.getByText('MobileHost', { exact: true }).waitFor({ state: 'visible' });
+    await guest.locator('.pname', { hasText: 'MobileHost' }).waitFor({ state: 'visible' });
     assert.equal(await guest.locator('.cat-view').count(), 12, `${name}: guest should see 12 read-only categories`);
     await assertNoHorizontalOverflow(guest, `${name} guest lobby`);
 
