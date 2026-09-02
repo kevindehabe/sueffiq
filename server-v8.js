@@ -6,7 +6,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const sourcePath = path.join(__dirname, 'server-v7.js');
-const runtimePath = path.join(__dirname, '.server-v7-category-runtime.js');
+const runtimePath = path.join(__dirname, `.server-v7-category-runtime-${process.pid}.js`);
 
 let source = fs.readFileSync(sourcePath, 'utf8');
 
