@@ -1,6 +1,6 @@
 'use strict';
 
-const tuneBase = require('./frontend-draw-timing-v47');
+const tuneBase = require('./frontend-draw-timing-v472');
 
 function mustReplace(source, needle, replacement, label) {
   if (!source.includes(needle)) throw new Error(`v5.1 Frontend-Patch fehlt: ${label}`);
@@ -26,8 +26,8 @@ module.exports = function tuneYouTubeTimerV51(html) {
   );
   html = mustReplace(
     html,
-    "if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';",
-    "if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='zeitgefuehl')return '';",
+    "if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='allemalen'&&state.current.miniStage==='rank')return '';",
+    "if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='zeitgefuehl')return '';if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='allemalen'&&state.current.miniStage==='rank')return '';",
     'Zeitgefühl ohne sichtbaren Rundentimer'
   );
 
