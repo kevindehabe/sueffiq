@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT || 3000);
 const INTERNAL_PORT = Number(process.env.SUEFFIQ_INTERNAL_PORT || 31337);
 const baseHtmlPath = path.join(__dirname, 'public', 'v4.html');
 const baseCorePath = path.join(__dirname, 'server-v4.js');
-const runtimeCorePath = path.join(__dirname, '.server-v42-runtime.js');
+const runtimeCorePath = path.join(__dirname, '.server-v421-runtime.js');
 
 function buildRuntimeCore() {
   let core = fs.readFileSync(baseCorePath, 'utf8');
@@ -42,6 +42,13 @@ function buildRuntimeCore() {
   core = core.replace(
     "    result.answer = `${cur.song.title} – ${cur.song.artist}`;",
     "    result.answer = `${cur.song.title} – ${cur.song.artist}`;\n    result.videoId = cur.song.videoId;"
+  );
+
+  // Wichtig für Entwicklung und kleine Runden: Songrunden werden auch mit nur einem verbundenen Spieler gespielt.
+  // Zuvor wurde genau diese Kategorie bei Solo-Tests übersprungen.
+  core = core.replace(
+    "  if (type === 'song' && connectedIds(room).length < 2) type = nextCategory(room);",
+    "  // Songrunden sind auch solo erlaubt."
   );
 
   // In jedem 10-Runden-Block alle großen Spiel-Familien; Schätzen zweimal.
@@ -90,9 +97,9 @@ function buildRuntimeCore() {
 }`
   );
 
-  core = core.replace(/version: '4\.0\.0'/g, "version: '4.2.0'");
-  core = core.replace(/SüffIQ\/4\.0/g, 'SueffIQ/4.2');
-  core = core.replace('SüffIQ v4 läuft', 'SüffIQ v4.2 core läuft');
+  core = core.replace(/version: '4\.0\.0'/g, "version: '4.2.1'");
+  core = core.replace(/SüffIQ\/4\.0/g, 'SueffIQ/4.2.1');
+  core = core.replace('SüffIQ v4 läuft', 'SüffIQ v4.2.1 core läuft');
 
   fs.writeFileSync(runtimeCorePath, core, 'utf8');
 }
@@ -111,7 +118,7 @@ child.on('exit', (code, signal) => {
 function patchedHtml() {
   let html = fs.readFileSync(baseHtmlPath, 'utf8');
 
-  html = html.replace('SüffIQ v4.0', 'SüffIQ v4.2');
+  html = html.replace('SüffIQ v4.0', 'SüffIQ v4.2.1');
   html = html.replace(
     '</style>',
     '.yt-stealth{position:fixed;left:-10000px;top:0;width:240px;height:240px;overflow:hidden;pointer-events:none;opacity:.01}.song-play{font-size:20px;padding:19px 16px}.yt-reveal{margin-top:14px}.yt-reveal iframe{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:14px}.mix-note{margin-top:8px;color:var(--muted);font-size:11px;text-align:center}</style>'
@@ -190,7 +197,7 @@ function bind(){`
 const server = http.createServer((req, res) => {
   if (req.url === '/health' || req.url === '/healthz') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
-    res.end(JSON.stringify({ ok: true, version: '4.2.0', mix: '10-round-variety' }));
+    res.end(JSON.stringify({ ok: true, version: '4.2.1', mix: '10-round-variety', soloSongs: true }));
     return;
   }
   if (req.url === '/robots.txt') {
@@ -248,5 +255,5 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`SüffIQ v4.2 shell läuft auf http://localhost:${PORT} (core ${INTERNAL_PORT})`);
+  console.log(`SüffIQ v4.2.1 shell läuft auf http://localhost:${PORT} (core ${INTERNAL_PORT})`);
 });
