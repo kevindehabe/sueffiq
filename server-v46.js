@@ -22,40 +22,12 @@ src = replaceRequired(
 src = replaceRequired(src, "const VERSION = '4.5.0';", "const VERSION = '4.6.0';", 'version');
 src = replaceRequired(src, 'Q.song = songs;', "Q.song = songs;\nQ.minigame = ['arcade'];", 'minigame pool');
 
-src = replaceRequired(
-  src,
-  "  skala: 'Skala',\n};",
-  "  skala: 'Skala',\n  minigame: 'Minigames',\n};",
-  'category'
-);
+src = replaceRequired(src, "  skala: 'Skala',\n};", "  skala: 'Skala',\n  minigame: 'Minigames',\n};", 'category');
+src = replaceRequired(src, "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30,\n};", "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30, minigame: 30,\n};", 'round seconds');
+src = replaceRequired(src, "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n  };", "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n    miniQueue: [], lastMini: null, lastDrawer: null,\n  };", 'room minigame state');
 
-src = replaceRequired(
-  src,
-  "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30,\n};",
-  "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30, minigame: 30,\n};",
-  'round seconds'
-);
-
-src = replaceRequired(
-  src,
-  "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n  };",
-  "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n    miniQueue: [], lastMini: null, lastDrawer: null,\n  };",
-  'room minigame state'
-);
-
-src = replaceRequired(
-  src,
-  "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group]\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);",
-  "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame']\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);",
-  'default minigame frequency'
-);
-
-src = replaceRequired(
-  src,
-  "    const customWeights = { schaetz: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };",
-  "    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };",
-  'custom minigame weight'
-);
+src = replaceRequired(src, "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group]\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);", "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame']\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);", 'default minigame frequency');
+src = replaceRequired(src, "    const customWeights = { schaetz: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };", "    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };", 'custom minigame weight');
 
 const miniHelpers = `const MINI_LABELS = { zeichnen: 'Zeichnen & Raten', reaktion: 'Reaktionstest', taps: 'Tap Battle', farbfolge: 'Farbfolge merken' };
 function nextMiniType(room) {
@@ -87,27 +59,11 @@ function chooseDrawer(room) {
   const idx = ids.indexOf(room.lastDrawer); return ids[(idx + 1) % ids.length];
 }
 `;
-
 src = replaceRequired(src, 'function pick(room, cat) {', miniHelpers + '\nfunction pick(room, cat) {', 'minigame helpers');
 
-src = replaceRequired(
-  src,
-  "    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];\n    else if (cur.type === 'wahrheit' || cur.type === 'pflicht')",
-  "    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];\n    else if (cur.type === 'minigame') {\n      if (cur.miniType === 'zeichnen') answered = id === cur.drawerId || !!cur.miniCorrect?.[id];\n      else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else answered = false;\n    }\n    else if (cur.type === 'wahrheit' || cur.type === 'pflicht')",
-  'minigame answered state'
-);
-
-src = replaceRequired(
-  src,
-  "  const base = { type: cur.type, label: CATS[cur.type], text: cur.text, options: cur.options, target: cur.target, deadline: cur.deadline, total: cur.total };",
-  "  const base = { type: cur.type, label: cur.type === 'minigame' ? miniLabel(cur.miniType) : CATS[cur.type], text: cur.text, options: cur.options, target: cur.target, deadline: cur.deadline, total: cur.total };",
-  'public minigame label'
-);
-
-src = replaceRequired(
-  src,
-  "  if (cur.type === 'wahrheit' || cur.type === 'pflicht') base.isTarget = cur.target === forId;",
-  `  if (cur.type === 'minigame') {
+src = replaceRequired(src, "    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];\n    else if (cur.type === 'wahrheit' || cur.type === 'pflicht')", "    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];\n    else if (cur.type === 'minigame') {\n      if (cur.miniType === 'zeichnen') answered = id === cur.drawerId || !!cur.miniCorrect?.[id];\n      else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else answered = false;\n    }\n    else if (cur.type === 'wahrheit' || cur.type === 'pflicht')", 'minigame answered state');
+src = replaceRequired(src, "  const base = { type: cur.type, label: CATS[cur.type], text: cur.text, options: cur.options, target: cur.target, deadline: cur.deadline, total: cur.total };", "  const base = { type: cur.type, label: cur.type === 'minigame' ? miniLabel(cur.miniType) : CATS[cur.type], text: cur.text, options: cur.options, target: cur.target, deadline: cur.deadline, total: cur.total };", 'public minigame label');
+src = replaceRequired(src, "  if (cur.type === 'wahrheit' || cur.type === 'pflicht') base.isTarget = cur.target === forId;", `  if (cur.type === 'minigame') {
     base.miniType = cur.miniType;
     if (cur.miniType === 'zeichnen') {
       base.drawerId = cur.drawerId; base.drawerName = displayName(room, cur.drawerId); base.isDrawer = forId === cur.drawerId;
@@ -118,9 +74,7 @@ src = replaceRequired(
     if (cur.miniType === 'taps') { base.startAt = cur.startAt; base.endAt = cur.endAt; }
     if (cur.miniType === 'farbfolge') { base.sequence = cur.sequence; base.showAt = cur.showAt; base.inputAt = cur.inputAt; }
   }
-  if (cur.type === 'wahrheit' || cur.type === 'pflicht') base.isTarget = cur.target === forId;`,
-  'public minigame fields'
-);
+  if (cur.type === 'wahrheit' || cur.type === 'pflicht') base.isTarget = cur.target === forId;`, 'public minigame fields');
 
 const minigameFinish = `  if (cur.type === 'minigame') {
     result.label = miniLabel(cur.miniType);
@@ -130,8 +84,7 @@ const minigameFinish = `  if (cur.type === 'minigame') {
       const solved = guessers.filter((id) => cur.miniCorrect[id]).sort((a, b) => cur.miniCorrect[a] - cur.miniCorrect[b]);
       const missed = guessers.filter((id) => !cur.miniCorrect[id]);
       solved.forEach((id, index) => { sipMap[id] = index === 0 ? 0 : 1; }); missed.forEach((id) => { sipMap[id] = 2; });
-      result.miniRows = solved.map((id) => ({ name: displayName(room, id), label: (cur.miniCorrect[id] / 1000).toFixed(1) + ' s' }))
-        .concat(missed.map((id) => ({ name: displayName(room, id), label: 'nicht erraten' })));
+      result.miniRows = solved.map((id) => ({ name: displayName(room, id), label: (cur.miniCorrect[id] / 1000).toFixed(1) + ' s' })).concat(missed.map((id) => ({ name: displayName(room, id), label: 'nicht erraten' })));
       result.lines.push(guessers.length ? solved.length + ' von ' + guessers.length + ' haben die Zeichnung erkannt.' : 'Solo-Test: Zeichnen braucht mindestens zwei Spieler.');
     }
     if (cur.miniType === 'reaktion') {
@@ -155,60 +108,28 @@ const minigameFinish = `  if (cur.type === 'minigame') {
     result.drinkers = giveSips(room, sipMap); room.lastResult = result; room.phase = 'results'; broadcast(room); return;
   }
 `;
+src = replaceRequired(src, "  const sipMap = {};\n  if (cur.type === 'nie') {", '  const sipMap = {};\n' + minigameFinish + "  if (cur.type === 'nie') {", 'minigame finish');
 
-src = replaceRequired(src, '  const sipMap = {};\n  if (cur.type === \'nie\') {', '  const sipMap = {};\n' + minigameFinish + "  if (cur.type === 'nie') {", 'minigame finish');
-
-src = replaceRequired(
-  src,
-  "  if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;",
-  `  if (cur.type === 'minigame') {
+src = replaceRequired(src, "  if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;", `  if (cur.type === 'minigame') {
     if (cur.miniType === 'zeichnen') { const guessers = ids.filter((id) => id !== cur.drawerId); return guessers.length > 0 && guessers.every((id) => !!cur.miniCorrect[id]); }
     if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') return ids.every((id) => cur.answers[id] !== undefined);
     return false;
   }
-  if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;`,
-  'all answered minigames'
-);
+  if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;`, 'all answered minigames');
 
-src = replaceRequired(
-  src,
-  "  const type = nextCategory(room); const total = ROUND_SECONDS[type] || 30;\n  const cur = { type, label: CATS[type], answers: {}, total, deadline: Date.now() + total * 1000 };",
-  "  const type = nextCategory(room); let total = ROUND_SECONDS[type] || 30;\n  const cur = { type, label: CATS[type], answers: {}, total, deadline: Date.now() + total * 1000 };",
-  'mutable total'
-);
-
-src = replaceRequired(
-  src,
-  "  if (type === 'song') { cur.text = 'Welcher Song läuft?'; cur.song = pick(room, 'song'); cur.songStage = 0; cur.songStartedAt = null; cur.guessFeed = []; cur.songCorrect = {}; cur.songNear = {}; }\n  cur.deadline = Date.now() + total * 1000;",
-  `  if (type === 'song') { cur.text = 'Welcher Song läuft?'; cur.song = pick(room, 'song'); cur.songStage = 0; cur.songStartedAt = null; cur.guessFeed = []; cur.songCorrect = {}; cur.songNear = {}; }
+src = replaceRequired(src, "  const type = nextCategory(room); const total = ROUND_SECONDS[type] || 30;\n  const cur = { type, label: CATS[type], answers: {}, total, deadline: Date.now() + total * 1000 };", "  const type = nextCategory(room); let total = ROUND_SECONDS[type] || 30;\n  const cur = { type, label: CATS[type], answers: {}, total, deadline: Date.now() + total * 1000 };", 'mutable total');
+src = replaceRequired(src, "  if (type === 'song') { cur.text = 'Welcher Song läuft?'; cur.song = pick(room, 'song'); cur.songStage = 0; cur.songStartedAt = null; cur.guessFeed = []; cur.songCorrect = {}; cur.songNear = {}; }\n  cur.deadline = Date.now() + total * 1000;", `  if (type === 'song') { cur.text = 'Welcher Song läuft?'; cur.song = pick(room, 'song'); cur.songStage = 0; cur.songStartedAt = null; cur.guessFeed = []; cur.songCorrect = {}; cur.songNear = {}; }
   if (type === 'minigame') {
     cur.miniType = nextMiniType(room); cur.label = miniLabel(cur.miniType); const now = Date.now();
-    if (cur.miniType === 'zeichnen') {
-      total = 45; cur.text = 'Zeichnen & Raten'; cur.drawerId = chooseDrawer(room); room.lastDrawer = cur.drawerId; cur.prompt = pickDrawPrompt(room);
-      cur.startedAt = now; cur.strokes = []; cur.guessFeed = []; cur.miniCorrect = {}; cur.miniNear = {};
-    }
+    if (cur.miniType === 'zeichnen') { total = 45; cur.text = 'Zeichnen & Raten'; cur.drawerId = chooseDrawer(room); room.lastDrawer = cur.drawerId; cur.prompt = pickDrawPrompt(room); cur.startedAt = now; cur.strokes = []; cur.guessFeed = []; cur.miniCorrect = {}; cur.miniNear = {}; }
     if (cur.miniType === 'reaktion') { total = 9; cur.text = 'Tippe erst, wenn die Fläche grün wird!'; cur.goAt = now + 1900 + Math.floor(Math.random() * 2600); }
     if (cur.miniType === 'taps') { total = 11; cur.text = 'Wer tippt in 7 Sekunden am häufigsten?'; cur.startAt = now + 1500; cur.endAt = cur.startAt + 7000; cur.tapCounts = {}; }
     if (cur.miniType === 'farbfolge') { total = 15; cur.text = 'Merke dir die Farbfolge.'; cur.sequence = randomSequence(6); cur.showAt = now + 900; cur.inputAt = cur.showAt + cur.sequence.length * 760 + 650; }
     cur.total = total;
   }
-  cur.deadline = Date.now() + total * 1000;`,
-  'start minigames'
-);
-
-src = replaceRequired(
-  src,
-  "  const cur = room.current; if (!cur || room.phase !== 'question' || ['person', 'bild', 'song'].includes(cur.type)) return;",
-  "  const cur = room.current; if (!cur || room.phase !== 'question' || ['person', 'bild', 'song', 'minigame'].includes(cur.type)) return;",
-  'generic answer excludes minigame'
-);
-
-src = replaceRequired(
-  src,
-  "    if (msg.t === 'host' && isHost && room.phase === 'lobby' && room.players[msg.id]?.connected) { room.hostId = msg.id; return broadcast(room); }",
-  "    if (msg.t === 'host' && isHost && ['lobby', 'results', 'end'].includes(room.phase) && room.players[msg.id]?.connected) { room.hostId = msg.id; return broadcast(room); }",
-  'master transfer phases'
-);
+  cur.deadline = Date.now() + total * 1000;`, 'start minigames');
+src = replaceRequired(src, "  const cur = room.current; if (!cur || room.phase !== 'question' || ['person', 'bild', 'song'].includes(cur.type)) return;", "  const cur = room.current; if (!cur || room.phase !== 'question' || ['person', 'bild', 'song', 'minigame'].includes(cur.type)) return;", 'generic answer excludes minigame');
+src = replaceRequired(src, "    if (msg.t === 'host' && isHost && room.phase === 'lobby' && room.players[msg.id]?.connected) { room.hostId = msg.id; return broadcast(room); }", "    if (msg.t === 'host' && isHost && ['lobby', 'results', 'end'].includes(room.phase) && room.players[msg.id]?.connected) { room.hostId = msg.id; return broadcast(room); }", 'master transfer phases');
 
 const miniHandlers = `    if (msg.t === 'miniGuess' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'zeichnen') {
       const cur = room.current; if (me === cur.drawerId || cur.miniCorrect[me]) return;
@@ -230,8 +151,7 @@ const miniHandlers = `    if (msg.t === 'miniGuess' && room.phase === 'question'
       if (allAnswered(room)) finishRound(room, 'complete'); else broadcast(room); return;
     }
     if (msg.t === 'miniTap' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'taps') {
-      const cur = room.current; const now = Date.now(); if (now < cur.startAt || now > cur.endAt + 500) return; const n = clamp(Math.round(Number(msg.n) || 0), 0, 30); if (!n) return;
-      cur.tapCounts[me] = clamp((cur.tapCounts[me] || 0) + n, 0, 500); return;
+      const cur = room.current; const now = Date.now(); if (now < cur.startAt || now > cur.endAt + 500) return; const n = clamp(Math.round(Number(msg.n) || 0), 0, 30); if (!n) return; cur.tapCounts[me] = clamp((cur.tapCounts[me] || 0) + n, 0, 500); return;
     }
     if (msg.t === 'miniMemory' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'farbfolge') {
       const cur = room.current; if (cur.answers[me] !== undefined || Date.now() < cur.inputAt - 150) return; const seq = Array.isArray(msg.seq) ? msg.seq.slice(0, cur.sequence.length).map(Number) : [];
@@ -239,27 +159,9 @@ const miniHandlers = `    if (msg.t === 'miniGuess' && room.phase === 'question'
       cur.answers[me] = { score, ms: Math.max(0, Date.now() - cur.inputAt) }; if (allAnswered(room)) finishRound(room, 'complete'); else broadcast(room); return;
     }
 `;
-
-src = replaceRequired(
-  src,
-  "    if (msg.t === 'personGuess' || msg.t === 'guess') return guessCurrent(room, me, msg.v);\n    if (msg.t === 'songPlay'",
-  "    if (msg.t === 'personGuess' || msg.t === 'guess') return guessCurrent(room, me, msg.v);\n" + miniHandlers + "    if (msg.t === 'songPlay'",
-  'minigame websocket handlers'
-);
-
-src = replaceRequired(
-  src,
-  '  html = hardenFrontend(html); return html;',
-  '  html = hardenFrontend(html); html = addMinigameFrontend(html); html = addShareFrontend(html); return html;',
-  'frontend modules'
-);
-
-src = replaceRequired(
-  src,
-  "imageStepSeconds: 4 })); return; }",
-  "imageStepSeconds: 4, minigames: MINI_TYPES, inviteLinks: true, masterTransfer: true })); return; }",
-  'health flags'
-);
+src = replaceRequired(src, "    if (msg.t === 'personGuess' || msg.t === 'guess') return guessCurrent(room, me, msg.v);\n    if (msg.t === 'songPlay'", "    if (msg.t === 'personGuess' || msg.t === 'guess') return guessCurrent(room, me, msg.v);\n" + miniHandlers + "    if (msg.t === 'songPlay'", 'minigame websocket handlers');
+src = replaceRequired(src, '  html = hardenFrontend(html); return html;', '  html = hardenFrontend(html); html = addMinigameFrontend(html); html = addShareFrontend(html); return html;', 'frontend modules');
+src = replaceRequired(src, "imageStepSeconds: 4, maxSipsPerRound: 3 })); return; }", "imageStepSeconds: 4, maxSipsPerRound: 3, minigames: MINI_TYPES, inviteLinks: true, masterTransfer: true })); return; }", 'health flags');
 
 const runtime = new Module(basePath, module.parent || module);
 runtime.filename = basePath;
