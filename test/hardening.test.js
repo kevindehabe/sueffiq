@@ -110,6 +110,9 @@ test('PWA endpoints and standalone metadata are present', async () => {
   assert.match(html, /manifest\.webmanifest/);
   assert.match(html, /apple-mobile-web-app-capable/);
   assert.match(html, /serviceWorker\.register/);
+  assert.match(html, /inviteCodeFromUrl/);
+  assert.match(html, /shareInvite/);
+  assert.match(html, /master-btn/);
 });
 
 test('rejoin replacing a still-open socket does not mark the new connection offline', async () => {
@@ -152,7 +155,7 @@ test('continuous song scoring is based on elapsed listening time', async () => {
   host.send({ t: 'guess', v: song.title });
   guest.c.send({ t: 'guess', v: song.title });
   const result = await host.state((s) => s.phase === 'results', 7000);
-  assert.match(result.result.lines.join(' '), /Je schneller/);
+  assert.match(result.result.lines.join(' '), /Schnell erkannt|Je schneller/);
   assert.equal(result.result.drinkers.length, 2);
   for (const d of result.result.drinkers) assert.equal(d.n, 1, `${d.name} should get 1 sip after about 6 seconds`);
 
