@@ -10,12 +10,15 @@ function mustReplace(source, needle, replacement, label) {
 module.exports = function tuneDrawTiming(html) {
   html = tuneBase(html);
 
-  const oldTimer = "function timerHtml(){return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>'; }";
-  const oldTimerCompact = "function timerHtml(){return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>'; }".replace('; }',';}');
-  const replacement = "function timerHtml(){if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='allemalen'&&state.current.miniStage==='rank')return '';return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>'; }".replace('; }',';}');
-  if (html.includes(oldTimer)) html = html.replace(oldTimer, replacement);
-  else if (html.includes(oldTimerCompact)) html = html.replace(oldTimerCompact, replacement);
-  else throw new Error('v4.7 Zeichen-Timer-Patch fehlt: timerHtml');
+  // Timer logic is shared by multiple minigames. Preserve an already-applied
+  // Tap-Battle condition instead of assuming the pristine base timer string.
+  const baseTimer = "function timerHtml(){return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}";
+  const tapTimer = "function timerHtml(){if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}";
+  const drawTimer = "function timerHtml(){if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='allemalen'&&state.current.miniStage==='rank')return '';return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}";
+  const combinedTimer = "function timerHtml(){if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='allemalen'&&state.current.miniStage==='rank')return '';return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}";
+  if (html.includes(tapTimer)) html = html.replace(tapTimer, combinedTimer);
+  else if (html.includes(baseTimer)) html = html.replace(baseTimer, drawTimer);
+  else if (!html.includes(combinedTimer) && !html.includes(drawTimer)) throw new Error('v4.7 Zeichen-Timer-Patch fehlt: timerHtml');
 
   html = html.replace(
     'Zwei Spieler, erstes Team auf 3 Punkte gewinnt. Zieh deinen Schläger direkt auf dem Feld.',
