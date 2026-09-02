@@ -7,15 +7,18 @@ const path = require('node:path');
 
 const root = path.join(__dirname, '..');
 
-test('production uses one server process without runtime server chaining', () => {
+test('production stays one process without child servers or temp runtimes', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   const compat = fs.readFileSync(path.join(root, 'server-v3.js'), 'utf8');
-  const prod = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  const entry = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  const extension = fs.readFileSync(path.join(root, 'server-v46.js'), 'utf8');
+  const core = fs.readFileSync(path.join(root, 'server-base-v45.js'), 'utf8');
+  const production = `${entry}\n${extension}\n${core}`;
 
   assert.equal(pkg.main, 'server.js');
   assert.equal(pkg.scripts.start, 'node server.js');
   assert.match(compat, /require\('\.\/server'\)/);
-  assert.doesNotMatch(compat, /server-v[478]/);
-  assert.doesNotMatch(prod, /child_process|\bspawn\s*\(|SUEFFIQ_INTERNAL_PORT|\.server-v\d/i);
-  assert.match(prod, /new WebSocketServer\(\{ server/);
+  assert.match(entry, /require\('\.\/server-v46'\)/);
+  assert.doesNotMatch(production, /child_process|\bspawn\s*\(|SUEFFIQ_INTERNAL_PORT|\.server-v\d+-runtime|31337/i);
+  assert.match(core, /new WebSocketServer\(\{ server/);
 });
