@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT || 3000);
 const INTERNAL_PORT = Number(process.env.SUEFFIQ_INTERNAL_PORT || 31337);
 const baseHtmlPath = path.join(__dirname, 'public', 'v4.html');
 const baseCorePath = path.join(__dirname, 'server-v4.js');
-const runtimeCorePath = path.join(__dirname, '.server-v43-runtime.js');
+const runtimeCorePath = path.join(__dirname, `.server-v43-runtime-${process.pid}.js`);
 
 function replaceRequired(source, needle, replacement, label) {
   if (!source.includes(needle)) throw new Error(`Patch fehlt: ${label}`);
