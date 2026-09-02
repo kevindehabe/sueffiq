@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#120b22" />
+  <title>SüffIQ</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0914;
+      --panel: #171022;
+      --panel2: #211630;
+      --line: rgba(255,255,255,.09);
+      --text: #f8f7fb;
+      --muted: #aaa0b7;
+      --accent: #b8ff4a;
+      --accent2: #8f5cff;
+      --danger: #ff5f74;
+      --ok: #57e39a;
+      --warn: #ffcc58;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(143,92,255,.22), transparent 36rem),
+        radial-gradient(circle at 90% 18%, rgba(184,255,74,.10), transparent 28rem),
+        var(--bg);
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .app { width: min(680px, 100%); min-height: 100dvh; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom)); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:950; font-size:24px; letter-spacing:-.8px; }
+    .brand-mark { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; background:linear-gradient(135deg,var(--accent2),#5d31bf); box-shadow:0 10px 26px rgba(143,92,255,.28); }
+    .brand b { color: var(--accent); }
+    .room-chip, .score-chip { border:1px solid var(--line); background:rgba(255,255,255,.045); border-radius:999px; padding:8px 11px; color:var(--muted); font-size:13px; font-weight:800; }
+    .room-chip strong, .score-chip strong { color:var(--text); letter-spacing:.7px; }
+    .hero { padding: 38px 4px 24px; text-align:center; }
+    .eyebrow { color:var(--accent); text-transform:uppercase; letter-spacing:2px; font-weight:900; font-size:12px; }
+    h1 { margin:10px 0 10px; font-size:clamp(42px, 12vw, 72px); letter-spacing:-3px; line-height:.95; }
+    h1 span { color:var(--accent); }
+    .subtitle { margin:0 auto; max-width:520px; color:var(--muted); line-height:1.55; font-size:16px; }
+    .card { background:linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025)); border:1px solid var(--line); border-radius:24px; box-shadow:var(--shadow); padding:18px; }
+    .stack { display:grid; gap:12px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .input { width:100%; border:1px solid var(--line); background:#100b18; color:var(--text); border-radius:16px; padding:15px 16px; outline:none; transition:.18s border,.18s box-shadow; }
+    .input:focus { border-color:rgba(184,255,74,.55); box-shadow:0 0 0 3px rgba(184,255,74,.09); }
+    .input.code { text-transform:uppercase; letter-spacing:4px; font-weight:900; text-align:center; }
+    .btn { width:100%; border:0; border-radius:16px; padding:15px 16px; font-weight:950; cursor:pointer; transition:transform .12s ease, opacity .12s ease; }
+    .btn:active { transform:scale(.985); }
+    .btn:disabled { opacity:.48; cursor:default; }
+    .btn-primary { background:var(--accent); color:#11170a; }
+    .btn-secondary { background:#2b1c40; color:var(--text); border:1px solid rgba(143,92,255,.28); }
+    .btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--line); }
+    .btn-danger { background:rgba(255,95,116,.12); color:#ff96a4; border:1px solid rgba(255,95,116,.22); }
+    .divider { display:flex; align-items:center; gap:10px; color:#746b7e; font-size:12px; margin:3px 0; }
+    .divider:before,.divider:after{content:""; height:1px; flex:1; background:var(--line);}
+    .category-cloud { display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin-top:22px; }
+    .pill { padding:7px 9px; border-radius:999px; border:1px solid var(--line); color:#bcb3c6; background:rgba(255,255,255,.03); font-size:11px; font-weight:800; }
+    .section-title { font-size:13px; color:var(--muted); font-weight:900; text-transform:uppercase; letter-spacing:1.2px; margin:20px 2px 10px; }
+    .code-box { text-align:center; padding:20px; margin-bottom:14px; }
+    .code-box small { color:var(--muted); display:block; margin-bottom:6px; }
+    .big-code { font-size:42px; font-weight:1000; letter-spacing:8px; line-height:1.1; }
+    .players { display:grid; gap:8px; }
+    .player { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 13px; background:rgba(255,255,255,.035); border:1px solid var(--line); border-radius:15px; }
+    .player-left { display:flex; align-items:center; gap:10px; min-width:0; }
+    .avatar { width:34px; height:34px; border-radius:12px; display:grid; place-items:center; background:#281a39; color:var(--accent); font-weight:1000; flex:0 0 auto; }
+    .player-name { font-weight:850; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .meta { color:var(--muted); font-size:12px; }
+    .dot { width:7px; height:7px; border-radius:50%; display:inline-block; background:var(--ok); margin-right:5px; }
+    .dot.off { background:#695f72; }
+    .crown { color:var(--warn); font-size:14px; }
+    .mini { border:1px solid var(--line); background:transparent; color:var(--muted); border-radius:10px; padding:7px 9px; font-size:11px; font-weight:800; }
+    .game-head { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:10px; }
+    .question-card { padding:20px; }
+    .category { color:var(--accent); font-size:12px; text-transform:uppercase; letter-spacing:1.5px; font-weight:1000; }
+    .question { font-size:clamp(24px, 7vw, 35px); line-height:1.12; letter-spacing:-1px; font-weight:950; margin:12px 0 18px; }
+    .target { display:inline-flex; align-items:center; gap:7px; border:1px solid rgba(184,255,74,.22); background:rgba(184,255,74,.07); color:var(--accent); padding:8px 10px; border-radius:12px; font-weight:850; font-size:13px; margin-bottom:12px; }
+    .timer { height:6px; background:rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin:2px 0 14px; }
+    .timer > div { height:100%; width:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); transform-origin:left; transition:transform .25s linear; }
+    .timer-label { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-bottom:5px; font-weight:800; }
+    .answers { display:grid; gap:9px; }
+    .answer-btn { text-align:left; border:1px solid var(--line); background:#171020; color:var(--text); border-radius:16px; padding:14px 15px; font-weight:850; cursor:pointer; }
+    .answer-btn:active { border-color:rgba(184,255,74,.45); background:#1e1727; }
+    .answer-btn.selected { border-color:rgba(184,255,74,.45); background:rgba(184,255,74,.09); color:var(--accent); }
+    .scale-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+    .scale-btn { aspect-ratio:1; border-radius:14px; border:1px solid var(--line); background:#171020; color:var(--text); font-weight:950; font-size:17px; }
+    .waiting { text-align:center; color:var(--muted); padding:17px 8px 4px; line-height:1.45; }
+    .waiting strong { color:var(--text); }
+    .answered-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:13px; }
+    .answered-chip { font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:6px 8px; }
+    .answered-chip.ok { color:#9cf2c4; border-color:rgba(87,227,154,.2); background:rgba(87,227,154,.06); }
+    .hints { display:grid; gap:8px; margin:4px 0 14px; }
+    .hint { border-left:3px solid var(--accent2); background:#15101e; padding:11px 12px; border-radius:5px 13px 13px 5px; line-height:1.42; }
+    .hint-number { color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:3px; }
+    .guess-form { display:flex; gap:8px; }
+    .guess-form .input { flex:1; }
+    .guess-form .btn { width:auto; min-width:92px; }
+    .feedback { margin-top:9px; border-radius:13px; padding:10px 12px; font-size:13px; font-weight:850; display:none; }
+    .feedback.show { display:block; }
+    .feedback.near { color:#ffd878; background:rgba(255,204,88,.09); border:1px solid rgba(255,204,88,.18); }
+    .feedback.correct { color:#8bf1ba; background:rgba(87,227,154,.09); border:1px solid rgba(87,227,154,.18); }
+    .feedback.wrong { color:#c5b9ce; background:rgba(255,255,255,.04); border:1px solid var(--line); }
+    .feed { margin-top:14px; }
+    .feed-line { padding:8px 1px; border-bottom:1px solid rgba(255,255,255,.055); color:var(--muted); font-size:13px; }
+    .feed-line b { color:var(--text); }
+    .result-hero { text-align:center; padding:8px 2px 14px; }
+    .result-hero .emoji { font-size:46px; }
+    .result-hero h2 { margin:6px 0 3px; font-size:28px; }
+    .result-line { color:var(--muted); line-height:1.45; }
+    .drinkers { display:grid; gap:8px; margin-top:12px; }
+    .drinker { display:flex; justify-content:space-between; align-items:center; border-radius:15px; padding:12px 13px; background:rgba(255,95,116,.075); border:1px solid rgba(255,95,116,.14); }
+    .drinker strong:last-child { color:#ff9baa; }
+    .dry { text-align:center; color:#91e9b8; border:1px solid rgba(87,227,154,.14); background:rgba(87,227,154,.055); border-radius:15px; padding:13px; }
+    .detail { margin-top:12px; display:grid; gap:7px; }
+    .detail-row { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; padding:10px 1px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .detail-row span:last-child { color:var(--muted); font-weight:850; }
+    .correct-answer { color:var(--accent); font-weight:950; font-size:20px; margin-top:7px; }
+    .scoreboard { display:grid; gap:8px; }
+    .score-row { display:grid; grid-template-columns:32px 1fr auto; gap:10px; align-items:center; padding:11px 12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.025); }
+    .rank { color:var(--muted); font-weight:900; text-align:center; }
+    .score { font-weight:950; color:var(--accent); }
+    .toast { position:fixed; left:50%; bottom:max(22px, env(safe-area-inset-bottom)); transform:translate(-50%, 18px); opacity:0; pointer-events:none; z-index:10; width:min(92vw,500px); padding:12px 14px; border-radius:14px; background:#241831; border:1px solid var(--line); color:var(--text); box-shadow:var(--shadow); transition:.2s; font-weight:800; font-size:13px; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .connection { display:none; position:sticky; top:max(8px, env(safe-area-inset-top)); z-index:9; margin-bottom:10px; padding:8px 10px; text-align:center; border-radius:12px; background:rgba(255,204,88,.11); border:1px solid rgba(255,204,88,.2); color:#ffd878; font-size:12px; font-weight:850; }
+    .connection.show { display:block; }
+    .footer-note { text-align:center; color:#716779; font-size:11px; margin-top:20px; line-height:1.45; }
+    @media (max-width:430px) {
+      .app { padding-left:14px; padding-right:14px; }
+      .grid2 { grid-template-columns:1fr; }
+      .big-code { font-size:36px; }
+      .question-card { padding:17px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div id="connection" class="connection">Verbindung wird wiederhergestellt …</div>
+    <div id="root"></div>
+  </main>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const root = document.getElementById('root');
+    const connection = document.getElementById('connection');
+    const toastEl = document.getElementById('toast');
+    const STORE = 'sueffiq-v2-session';
+
+    let ws = null;
+    let state = null;
+    let session = readSession();
+    let reconnectTimer = null;
+    let timerTick = null;
+    let serverClockOffset = 0;
+    let personFeedback = null;
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    }
+
+    function readSession() {
+      try { return JSON.parse(localStorage.getItem(STORE) || 'null'); } catch { return null; }
+    }
+    function saveSession(next) {
+      session = next;
+      if (next) localStorage.setItem(STORE, JSON.stringify(next));
+      else localStorage.removeItem(STORE);
+    }
+    function send(payload) {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(payload));
+    }
+    function toast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toastEl.classList.remove('show'), 2300);
+    }
+
+    function connect() {
+      clearTimeout(reconnectTimer);
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}`);
+      ws.addEventListener('open', () => {
+        connection.classList.remove('show');
+        if (session?.code && session?.id) send({ t:'rejoin', code:session.code, id:session.id });
+      });
+      ws.addEventListener('message', event => {
+        let msg; try { msg = JSON.parse(event.data); } catch { return; }
+        if (msg.t === 'joined') {
+          saveSession({ code: msg.code, id: msg.id });
+          return;
+        }
+        if (msg.t === 'state') {
+          state = msg.s;
+          serverClockOffset = Number(state.now || Date.now()) - Date.now();
+          render();
+          return;
+        }
+        if (msg.t === 'personFeedback') {
+          personFeedback = { status: msg.status, m: msg.m };
+          toast(msg.m);
+          render();
+          return;
+        }
+        if (msg.t === 'error') return toast(msg.m || 'Das hat nicht geklappt.');
+        if (msg.t === 'reset') {
+          saveSession(null);
+          state = null;
+          personFeedback = null;
+          renderHome();
+        }
+      });
+      ws.addEventListener('close', () => {
+        if (session) connection.classList.add('show');
+        reconnectTimer = setTimeout(connect, 1200);
+      });
+    }
+
+    function logoBar(extra = '') {
+      return `<div class="topbar">
+        <div class="brand"><span class="brand-mark">S</span><span>Süff<b>IQ</b></span></div>
+        ${extra}
+      </div>`;
+    }
+
+    function renderHome() {
+      clearInterval(timerTick);
+      state = null;
+      const roomFromUrl = new URLSearchParams(location.search).get('room') || '';
+      root.innerHTML = `${logoBar()}
+        <section class="hero">
+          <div class="eyebrow">Multiplayer Party Game</div>
+          <h1>Süff<span>IQ</span></h1>
+          <p class="subtitle">Ein Raum, alle Handys, kein Account. Zehn Kategorien laufen automatisch durcheinander – einfach Namen eingeben und los.</p>
+        </section>
+        <section class="card stack">
+          <input id="name" class="input" maxlength="18" autocomplete="nickname" placeholder="Dein Name" />
+          <button id="create" class="btn btn-primary">Spiel erstellen</button>
+          <div class="divider">oder beitreten</div>
+          <input id="code" class="input code" maxlength="5" value="${esc(roomFromUrl.toUpperCase())}" placeholder="ABCDE" inputmode="text" />
+          <button id="join" class="btn btn-secondary">Spiel beitreten</button>
+        </section>
+        <div class="category-cloud">
+          ${['Ich hab noch nie','Wahl','Schätzfrage','Entweder oder','Quiz','Wahrheit','Pflicht','Person erraten','Mehrheit','Skala'].map(x=>`<span class="pill">${esc(x)}</span>`).join('')}
+        </div>
+        <div class="footer-note">Ab 18. Du entscheidest selbst, was und wie viel du trinkst. Funktioniert genauso gut alkoholfrei.</div>`;
+
+      const name = document.getElementById('name');
+      const code = document.getElementById('code');
+      const storedName = localStorage.getItem('sueffiq-name');
+      if (storedName) name.value = storedName;
+      code.addEventListener('input', () => code.value = code.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5));
+      document.getElementById('create').onclick = () => {
+        const n = name.value.trim();
+        if (!n) return toast('Bitte gib zuerst deinen Namen ein.');
+        localStorage.setItem('sueffiq-name', n);
+        send({ t:'create', name:n });
+      };
+      document.getElementById('join').onclick = () => {
+        const n = name.value.trim();
+        const c = code.value.trim().toUpperCase();
+        if (!n) return toast('Bitte gib zuerst deinen Namen ein.');
+        if (c.length !== 5) return toast('Der Spielcode hat fünf Zeichen.');
+        localStorage.setItem('sueffiq-name', n);
+        send({ t:'join', code:c, name:n });
+      };
+    }
+
+    function me() { return state?.players?.find(p => p.id === state.you); }
+    function isHost() { return state?.hostId === state?.you; }
+    function hostName() { return state?.players?.find(p => p.id === state.hostId)?.name || 'Roundmaster'; }
+    function initials(name) { return String(name || '?').trim().slice(0,1).toUpperCase(); }
+
+    function playerList(allowTransfer = false) {
+      return `<div class="players">${state.players.map(p => `<div class="player">
+        <div class="player-left">
+          <div class="avatar">${esc(initials(p.name))}</div>
+          <div><div class="player-name">${esc(p.name)} ${p.id===state.hostId?'<span class="crown">♛</span>':''}${p.id===state.you?' <span class="meta">(du)</span>':''}</div>
+          <div class="meta"><span class="dot ${p.connected?'':'off'}"></span>${p.connected?'online':'offline'} · ${p.drinks} Schlücke</div></div>
+        </div>
+        ${allowTransfer && isHost() && p.connected && p.id !== state.you ? `<button class="mini host-transfer" data-id="${esc(p.id)}">Roundmaster</button>` : ''}
+      </div>`).join('')}</div>`;
+    }
+
+    function bindTransfers() {
+      document.querySelectorAll('.host-transfer').forEach(btn => btn.onclick = () => send({ t:'host', id:btn.dataset.id }));
+    }
+
+    async function shareRoom() {
+      const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(state.code)}`;
+      const text = `SüffIQ – Code ${state.code}`;
+      if (navigator.share) {
+        try { await navigator.share({ title:'SüffIQ', text, url }); return; } catch {}
+      }
+      try { await navigator.clipboard.writeText(`${text}\n${url}`); toast('Einladungslink kopiert.'); }
+      catch { toast(`Code: ${state.code}`); }
+    }
+
+    function renderLobby() {
+      clearInterval(timerTick);
+      root.innerHTML = `${logoBar(`<span class="score-chip">${esc(me()?.name || '')} · <strong>${me()?.drinks || 0}</strong></span>`)}
+        <section class="card code-box">
+          <small>Spielcode</small>
+          <div class="big-code">${esc(state.code)}</div>
+          <button id="share" class="mini" style="margin-top:12px">Code teilen</button>
+        </section>
+        <div class="section-title">Mitspieler · ${state.players.filter(p=>p.connected).length}</div>
+        ${playerList(true)}
+        <div class="stack" style="margin-top:16px">
+          ${isHost() ? '<button id="start" class="btn btn-primary">Spiel starten</button>' : `<div class="waiting">Warte auf <strong>${esc(hostName())}</strong> …</div>`}
+        </div>`;
+      document.getElementById('share').onclick = shareRoom;
+      const start = document.getElementById('start'); if (start) start.onclick = () => send({ t:'start' });
+      bindTransfers();
+    }
+
+    function timerHtml(cur) {
+      return `<div class="timer-label"><span>Runde ${state.round}</span><span id="timerText">${cur.total}s</span></div><div class="timer"><div id="timerBar"></div></div>`;
+    }
+
+    function startTimer(cur) {
+      clearInterval(timerTick);
+      const tick = () => {
+        const bar = document.getElementById('timerBar');
+        const label = document.getElementById('timerText');
+        if (!bar || !label) return;
+        const now = Date.now() + serverClockOffset;
+        const leftMs = Math.max(0, cur.deadline - now);
+        const ratio = Math.max(0, Math.min(1, leftMs / (cur.total * 1000)));
+        bar.style.transform = `scaleX(${ratio})`;
+        label.textContent = `${Math.ceil(leftMs/1000)}s`;
+      };
+      tick(); timerTick = setInterval(tick, 250);
+    }
+
+    function answeredStatus() {
+      return `<div class="answered-row">${state.players.filter(p=>p.connected).map(p => `<span class="answered-chip ${p.answered?'ok':''}">${p.answered?'✓ ':''}${esc(p.name)}</span>`).join('')}</div>`;
+    }
+
+    function questionControls(cur) {
+      const mine = state.players.find(p=>p.id===state.you);
+      const answered = !!mine?.answered;
+      if (cur.type === 'person') return personControls(cur);
+      if ((cur.type === 'wahrheit' || cur.type === 'pflicht') && !cur.isTarget) {
+        const target = state.players.find(p=>p.id===cur.target)?.name || 'Die ausgewählte Person';
+        return `<div class="waiting"><strong>${esc(target)}</strong> ist dran.<br>Du kannst dich kurz zurücklehnen.</div>`;
+      }
+      if (answered) return `<div class="waiting"><strong>Antwort gespeichert.</strong><br>Die Runde löst automatisch auf, sobald alle fertig sind.</div>`;
+
+      if (cur.type === 'nie') return `<div class="grid2"><button class="btn btn-primary answer" data-v="ja">Hab ich</button><button class="btn btn-secondary answer" data-v="nein">Noch nie</button></div>`;
+      if (cur.type === 'wahl') return `<div class="answers">${state.players.filter(p=>p.connected).map(p=>`<button class="answer-btn answer" data-v="${esc(p.id)}">${esc(p.name)}</button>`).join('')}</div>`;
+      if (cur.type === 'schaetz') return `<div class="guess-form"><input id="numberAnswer" class="input" inputmode="decimal" placeholder="Deine Schätzung" /><button id="sendNumber" class="btn btn-primary">Tippen</button></div>`;
+      if (cur.type === 'oder' || cur.type === 'trivia' || cur.type === 'mehrheit') return `<div class="answers">${cur.options.map((o,i)=>`<button class="answer-btn answer" data-v="${i}">${esc(o)}</button>`).join('')}</div>`;
+      if (cur.type === 'skala') return `<div class="scale-grid">${Array.from({length:10},(_,i)=>`<button class="scale-btn answer" data-v="${i+1}">${i+1}</button>`).join('')}</div>`;
+      if (cur.type === 'wahrheit') return `<div class="grid2"><button class="btn btn-primary answer" data-v="done">Beantwortet</button><button class="btn btn-danger answer" data-v="drink">Trinke lieber</button></div>`;
+      if (cur.type === 'pflicht') return `<div class="grid2"><button class="btn btn-primary answer" data-v="done">Mache ich</button><button class="btn btn-danger answer" data-v="drink">Trinke lieber</button></div>`;
+      return '';
+    }
+
+    function personControls(cur) {
+      const status = cur.yourStatus?.status;
+      const feed = cur.guessFeed || [];
+      return `<div class="hints">${(cur.hints||[]).map((h,i)=>`<div class="hint"><span class="hint-number">Hinweis ${i+1} von ${cur.hintCount}</span>${esc(h)}</div>`).join('')}</div>
+        ${status === 'correct' ? `<div class="feedback show correct">✓ Richtig erkannt bei Hinweis ${cur.yourStatus.hint}. Dein Tipp bleibt geheim.</div>` : `
+          <form id="personForm" class="guess-form"><input id="personGuess" class="input" autocomplete="off" maxlength="40" placeholder="Person eingeben …" /><button class="btn btn-primary">Tippen</button></form>
+          <div class="feedback ${personFeedback?'show '+esc(personFeedback.status):''}">${personFeedback?esc(personFeedback.m):''}</div>`}
+        <div class="feed">${feed.length ? `<div class="section-title">Falsche Tipps</div>${feed.slice().reverse().map(g=>`<div class="feed-line"><b>${esc(g.name)}</b>: ${esc(g.guess)} <span class="meta">· Hinweis ${g.hint}</span></div>`).join('')}` : '<div class="waiting">Falsche Tipps werden hier für alle sichtbar. Nahe oder richtige Tipps bleiben geheim.</div>'}</div>`;
+    }
+
+    function bindQuestion(cur) {
+      document.querySelectorAll('.answer').forEach(btn => btn.onclick = () => send({ t:'answer', v: btn.dataset.v }));
+      const number = document.getElementById('numberAnswer');
+      const sendNumber = document.getElementById('sendNumber');
+      if (number && sendNumber) {
+        const go = () => { if (number.value.trim()) send({ t:'answer', v:number.value.trim() }); };
+        sendNumber.onclick = go;
+        number.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      }
+      const form = document.getElementById('personForm');
+      if (form) form.onsubmit = e => {
+        e.preventDefault();
+        const input = document.getElementById('personGuess');
+        const value = input.value.trim();
+        if (!value) return;
+        send({ t:'personGuess', v:value });
+        input.value = '';
+      };
+    }
+
+    function renderQuestion() {
+      const cur = state.current;
+      root.innerHTML = `${logoBar(`<span class="room-chip">${esc(state.code)} · <strong>${me()?.drinks || 0}</strong> 🍺</span>`)}
+        <div class="game-head"><span class="meta">Roundmaster: ${esc(hostName())}</span><span class="meta">${state.players.filter(p=>p.connected).length} online</span></div>
+        <section class="card question-card">
+          <div class="category">${esc(cur.label)}</div>
+          ${cur.target ? `<div class="target">🎯 ${esc(state.players.find(p=>p.id===cur.target)?.name || '')}</div>` : ''}
+          <div class="question">${esc(cur.text)}</div>
+          ${timerHtml(cur)}
+          ${questionControls(cur)}
+          ${cur.type !== 'person' && cur.type !== 'wahrheit' && cur.type !== 'pflicht' ? answeredStatus() : ''}
+        </section>`;
+      bindQuestion(cur);
+      startTimer(cur);
+    }
+
+    function resultDetails(r) {
+      let html = '';
+      if (r.answer !== undefined) html += `<div class="section-title">Lösung</div><div class="correct-answer">${esc(r.answer)}${r.unit?' '+esc(r.unit):''}</div>`;
+      if (r.votes?.length) html += `<div class="section-title">Abstimmung</div><div class="detail">${r.votes.map(v=>`<div class="detail-row"><span>${esc(v.name)}</span><span>${v.n}</span></div>`).join('')}</div>`;
+      if (r.guesses?.length && r.type === 'schaetz') html += `<div class="section-title">Schätzungen</div><div class="detail">${r.guesses.map(g=>`<div class="detail-row"><span>${esc(g.name)} · ${esc(g.guess)} ${esc(r.unit||'')}</span><span>${g.sips?g.sips+' 🍺':'trocken'}</span></div>`).join('')}</div>`;
+      if (r.scale?.length) html += `<div class="section-title">Skala</div><div class="detail">${r.scale.sort((a,b)=>a.value-b.value).map(g=>`<div class="detail-row"><span>${esc(g.name)} · ${g.value}/10</span><span>${g.sips?g.sips+' 🍺':'trocken'}</span></div>`).join('')}</div>`;
+      return html;
+    }
+
+    function renderResults() {
+      clearInterval(timerTick);
+      personFeedback = null;
+      const r = state.result || { lines:[], drinkers:[] };
+      root.innerHTML = `${logoBar(`<span class="room-chip">${esc(state.code)} · <strong>${me()?.drinks || 0}</strong> 🍺</span>`)}
+        <section class="card">
+          <div class="result-hero"><div class="emoji">${r.drinkers?.length?'🍻':'🧠'}</div><h2>${esc(r.label || 'Ergebnis')}</h2>${(r.lines||[]).map(x=>`<div class="result-line">${esc(x)}</div>`).join('')}</div>
+          ${r.drinkers?.length ? `<div class="section-title">Trinken</div><div class="drinkers">${r.drinkers.map(d=>`<div class="drinker"><strong>${esc(d.name)}</strong><strong>${d.n} ${d.n===1?'Schluck':'Schlücke'}</strong></div>`).join('')}</div>` : '<div class="dry">Diese Runde bleibt trocken.</div>'}
+          ${resultDetails(r)}
+        </section>
+        <div class="section-title">Gesamtstand</div>
+        ${scoreboard()}
+        <div class="stack" style="margin-top:15px">${isHost()?'<button id="next" class="btn btn-primary">Nächste Runde</button><button id="end" class="btn btn-ghost">Spiel beenden</button>':`<div class="waiting"><strong>${esc(hostName())}</strong> startet die nächste Runde.</div>`}</div>`;
+      const next = document.getElementById('next'); if (next) next.onclick = () => send({ t:'next' });
+      const end = document.getElementById('end'); if (end) end.onclick = () => send({ t:'end' });
+    }
+
+    function scoreboard() {
+      const sorted = [...state.players].sort((a,b)=>b.drinks-a.drinks || a.name.localeCompare(b.name));
+      return `<div class="scoreboard">${sorted.map((p,i)=>`<div class="score-row"><div class="rank">${i+1}.</div><div><strong>${esc(p.name)}</strong>${p.id===state.hostId?' <span class="crown">♛</span>':''}</div><div class="score">${p.drinks} 🍺</div></div>`).join('')}</div>`;
+    }
+
+    function renderEnd() {
+      clearInterval(timerTick);
+      root.innerHTML = `${logoBar(`<span class="room-chip">${esc(state.code)}</span>`)}
+        <section class="hero" style="padding-top:22px"><div class="eyebrow">Feierabend</div><h1 style="font-size:48px">Das war <span>SüffIQ</span></h1><p class="subtitle">Der Endstand zählt Schlücke – keine Promille.</p></section>
+        ${scoreboard()}
+        <div class="stack" style="margin-top:16px">${isHost()?'<button id="again" class="btn btn-primary">Weiter spielen</button>':''}<button id="leave" class="btn btn-ghost">Zur Startseite</button></div>`;
+      const again = document.getElementById('again'); if (again) again.onclick = () => send({ t:'start' });
+      document.getElementById('leave').onclick = () => { saveSession(null); state=null; personFeedback=null; history.replaceState(null,'',location.pathname); try{ws.close();}catch{} renderHome(); };
+    }
+
+    function render() {
+      if (!state) return renderHome();
+      if (state.phase === 'lobby') return renderLobby();
+      if (state.phase === 'question') return renderQuestion();
+      if (state.phase === 'results') return renderResults();
+      if (state.phase === 'end') return renderEnd();
+      renderHome();
+    }
+
+    renderHome();
+    connect();
+    setInterval(() => send({ t:'ping' }), 25000);
+  </script>
+</body>
+</html>
