@@ -10,6 +10,14 @@ function mustReplace(source, needle, replacement, label) {
 module.exports = function tuneITunesSongs(html) {
   html = tuneBase(html);
 
+  // frontend-minigames-v471 previously injected a visible YouTube lobby unlock flow.
+  // Remove that entire runtime extension while keeping the later drawing/rating extension intact.
+  const legacyAudioStart = html.indexOf('var AUDIO_WARMUP=');
+  const drawingExtensionStart = html.indexOf('var allDrawRatings=');
+  if (legacyAudioStart >= 0 && drawingExtensionStart > legacyAudioStart) {
+    html = html.slice(0, legacyAudioStart) + html.slice(drawingExtensionStart);
+  }
+
   html = mustReplace(html, '</style>', `
 .itunes-song-status{margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(143,92,255,.22);border-radius:13px;background:rgba(143,92,255,.055);color:var(--muted);font-size:12px;font-weight:800;text-align:center}
 .itunes-song-status.ready{color:#91e9b8;border-color:rgba(87,227,154,.22);background:rgba(87,227,154,.055)}
@@ -83,17 +91,14 @@ function playSyncedITunes(m,force){
   },delay);
 }
 
-// Disable the legacy YouTube path. Existing callers now prepare the persistent HTML5 audio element instead.
+// Existing legacy song functions are redirected to the persistent HTML5 audio path.
 ensureYTApi=function(cur){prepareITunesSong(cur);};
 createYTPlayer=function(cur){prepareITunesSong(cur);};
-prepareLobbyAudio=function(){};
-activateLobbyAudio=function(){primeITunesAudio();};
 cleanupYouTube=function(){stopITunesAudio();};
 playSyncedSong=function(m,force){playSyncedITunes(m,force);};
 playSongButton=function(){var cur=state&&state.current;if(!cur||cur.type!=='song'||!cur.isHost)return;primeITunesAudio();prepareITunesSong(cur);send({t:'songPlay'});};
 
-// v4.7 added a separate lobby sound button. iTunes playback is primed invisibly by the normal entry tap instead.
-if(typeof v471LobbyHtml==='function')lobbyHtml=v471LobbyHtml;
+// The normal Create/Join gesture primes the same persistent audio element invisibly.
 var itunesBindLanding=bindLanding;
 bindLanding=function(){
   itunesBindLanding();
