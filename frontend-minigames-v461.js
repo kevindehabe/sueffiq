@@ -12,6 +12,19 @@ module.exports = function tuneIndividualTapBattle(html) {
 
   html = mustReplace(
     html,
+    'reactionSent=false,reactionOutcome=null,tapStarting=false,tapLocal=0',
+    'reactionSent=false,reactionOutcome=null,tapStarting=false,tapUiTimer=null,tapLocal=0',
+    'tap ui timer global'
+  );
+  html = mustReplace(
+    html,
+    'reactionSent=false;reactionOutcome=null;tapStarting=false;tapLocal=0;tapPending=0;if(tapFlushTimer){clearInterval(tapFlushTimer);tapFlushTimer=null;}',
+    'reactionSent=false;reactionOutcome=null;tapStarting=false;if(tapUiTimer){clearInterval(tapUiTimer);tapUiTimer=null;}tapLocal=0;tapPending=0;if(tapFlushTimer){clearInterval(tapFlushTimer);tapFlushTimer=null;}',
+    'tap ui timer reset'
+  );
+
+  html = mustReplace(
+    html,
     'Der erste Tap startet für alle einen kurzen Countdown. Danach laufen exakt sieben Sekunden.',
     'Jeder startet seinen eigenen Countdown. Danach hast du exakt sieben Sekunden zum Tappen.',
     'tap intro'
