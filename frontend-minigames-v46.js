@@ -1,0 +1,97 @@
+'use strict';
+
+function mustReplace(html, needle, replacement, label) {
+  if (!html.includes(needle)) throw new Error(`Minigame-Frontend-Patch fehlt: ${label}`);
+  return html.replace(needle, replacement);
+}
+
+module.exports = function addMinigameFrontend(html) {
+  html = mustReplace(
+    html,
+    '</style>',
+    `.mini-shell{display:grid;gap:12px}.mini-banner{border:1px solid rgba(143,92,255,.28);background:rgba(143,92,255,.07);border-radius:16px;padding:12px 13px}.mini-title{font-weight:950;font-size:17px}.mini-sub{color:var(--muted);font-size:12px;line-height:1.4;margin-top:4px}.draw-secret{font-size:27px;font-weight:1000;color:var(--accent);text-align:center;padding:8px}.draw-canvas{display:block;width:100%;aspect-ratio:1;background:#fff;border-radius:18px;border:2px solid rgba(255,255,255,.16);touch-action:none}.draw-tools{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.draw-color,.draw-clear{min-height:43px;border-radius:12px;border:1px solid var(--line);font-weight:900}.draw-color[data-c="0"]{background:#151515}.draw-color[data-c="1"]{background:#8f5cff}.draw-color[data-c="2"]{background:#b8ff4a}.draw-color[data-c="3"]{background:#ff5f74}.draw-color.active{outline:3px solid #fff;outline-offset:1px}.draw-clear{background:#241831;color:var(--text)}.mini-feed{display:grid;gap:6px}.mini-feed div{font-size:12px;color:var(--muted);padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.06)}.mini-feed b{color:var(--text)}.reaction-pad,.tap-pad{width:100%;min-height:190px;border-radius:24px;border:1px solid var(--line);font-size:clamp(29px,10vw,48px);font-weight:1000;background:#241831;color:var(--text);touch-action:manipulation;user-select:none;-webkit-user-select:none}.reaction-pad.go{background:var(--accent);color:#11170a;box-shadow:0 0 42px rgba(184,255,74,.22)}.reaction-pad.done{background:#171020;color:var(--muted)}.tap-pad.live{background:linear-gradient(135deg,var(--purple),#5d31bf);color:#fff;transform:scale(1)}.tap-pad.live:active{transform:scale(.97)}.tap-count{text-align:center;font-size:52px;font-weight:1000;color:var(--accent);line-height:1}.tap-label{text-align:center;color:var(--muted);font-size:12px}.memory-stage{height:130px;display:grid;place-items:center;border-radius:22px;border:1px solid var(--line);background:#120c1b}.memory-orb{width:86px;height:86px;border-radius:26px;background:#2a2133;transition:.12s;box-shadow:0 0 0 rgba(0,0,0,0)}.memory-orb.c0{background:#8f5cff;box-shadow:0 0 40px rgba(143,92,255,.38)}.memory-orb.c1{background:#b8ff4a;box-shadow:0 0 40px rgba(184,255,74,.32)}.memory-orb.c2{background:#ff9d45;box-shadow:0 0 40px rgba(255,157,69,.32)}.memory-orb.c3{background:#4aa8ff;box-shadow:0 0 40px rgba(74,168,255,.32)}.memory-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.memory-btn{min-height:76px;border-radius:17px;border:1px solid var(--line);font-weight:950;font-size:15px;color:#111}.memory-btn:disabled{opacity:.25}.memory-btn[data-c="0"]{background:#8f5cff;color:#fff}.memory-btn[data-c="1"]{background:#b8ff4a}.memory-btn[data-c="2"]{background:#ff9d45}.memory-btn[data-c="3"]{background:#4aa8ff}.memory-progress{text-align:center;color:var(--muted);font-weight:850;font-size:12px}.mini-rank{margin-top:12px;display:grid;gap:7px}.mini-rank-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025)}.mini-rank-row strong:last-child{color:var(--accent)}</style>`,
+    'minigame css'
+  );
+
+  html = mustReplace(
+    html,
+    "var KEY='sueffiq-v4',ws=null,state=null,joined=null,feedback=null,retry=null,timerLoop=null,pendingEntry=null,selectedChoice=null,selectedChoiceRound=0;",
+    "var KEY='sueffiq-v4',ws=null,state=null,joined=null,feedback=null,retry=null,timerLoop=null,pendingEntry=null,selectedChoice=null,selectedChoiceRound=0,drawCtx=null,drawCanvas=null,drawLast=null,drawColor=0,drawLastSent=0,reactionSent=false,tapLocal=0,tapPending=0,tapFlushTimer=null,memoryInput=[],memoryReady=false,memoryTimers=[];",
+    'minigame globals'
+  );
+
+  html = mustReplace(
+    html,
+    "      if(prev&&m.s&&prev.round!==m.s.round){feedback=null;selectedChoice=null;selectedChoiceRound=0;songAudioUnlocked=false;lastSongSyncKey=null;}",
+    "      if(prev&&m.s&&prev.round!==m.s.round){feedback=null;selectedChoice=null;selectedChoiceRound=0;songAudioUnlocked=false;lastSongSyncKey=null;resetMiniLocal();}",
+    'round reset'
+  );
+
+  html = mustReplace(
+    html,
+    "    if(m.t==='songPlay'){playSyncedSong(m);return;}\n    if(m.t==='guessFeedback'||m.t==='personFeedback')",
+    "    if(m.t==='songPlay'){playSyncedSong(m);return;}\n    if(m.t==='drawStroke'){drawRemoteStroke(m.stroke);return;}\n    if(m.t==='drawClear'){clearDrawCanvas();return;}\n    if(m.t==='drawGuess'){appendDrawGuess(m);return;}\n    if(m.t==='guessFeedback'||m.t==='personFeedback')",
+    'minigame websocket events'
+  );
+
+  const functions = `
+function isMiniType(t){return t==='zeichnen'||t==='reaktion'||t==='taps'||t==='farbfolge';}
+function resetMiniLocal(){drawCtx=null;drawCanvas=null;drawLast=null;drawColor=0;drawLastSent=0;reactionSent=false;tapLocal=0;tapPending=0;if(tapFlushTimer){clearInterval(tapFlushTimer);tapFlushTimer=null;}memoryInput=[];memoryReady=false;for(var i=0;i<memoryTimers.length;i++)clearTimeout(memoryTimers[i]);memoryTimers=[];}
+function drawMiniHtml(cur){
+  var top='<div class="mini-shell"><div class="mini-banner"><div class="mini-title">✏️ Zeichnen & Raten</div><div class="mini-sub">'+(cur.isDrawer?'Du zeichnest. Die anderen müssen den Begriff erraten.':'Zeichnung von <b>'+esc(cur.drawerName||'jemandem')+'</b>. Rate so oft du willst.')+'</div></div>';
+  if(cur.isDrawer)top+='<div class="draw-secret">'+esc(cur.prompt||'…')+'</div>';
+  top+='<canvas id="drawCanvas" class="draw-canvas"></canvas>';
+  if(cur.isDrawer)top+='<div class="draw-tools"><button class="draw-color active" data-c="0" aria-label="Schwarz"></button><button class="draw-color" data-c="1" aria-label="Lila"></button><button class="draw-color" data-c="2" aria-label="Grün"></button><button class="draw-color" data-c="3" aria-label="Rot"></button><button id="drawClear" class="draw-clear">Löschen</button></div>';
+  else top+='<form id="miniGuessForm" class="guess"><input id="guessInput" class="input" maxlength="48" autocomplete="off" autocapitalize="words" enterkeyhint="send" placeholder="Begriff eingeben …"><button class="btn primary">Raten</button></form>'+feedbackHtml();
+  top+='<div id="miniGuessFeed" class="mini-feed"></div></div>';return top;
+}
+function reactionMiniHtml(cur){return '<div class="mini-shell"><div class="mini-banner"><div class="mini-title">⚡ Reaktion</div><div class="mini-sub">Nicht zu früh! Sobald die Fläche grün wird: sofort tippen.</div></div><button id="reactionPad" class="reaction-pad">WARTEN …</button><div id="reactionInfo" class="tap-label">Finger bereit halten</div></div>';}
+function tapMiniHtml(cur){return '<div class="mini-shell"><div class="mini-banner"><div class="mini-title">👆 Tap Battle</div><div class="mini-sub">Sobald es losgeht: so oft wie möglich auf die Fläche hämmern.</div></div><div id="tapCount" class="tap-count">0</div><div id="tapLabel" class="tap-label">Gleich geht’s los …</div><button id="tapPad" class="tap-pad">BEREIT</button></div>';}
+function memoryMiniHtml(cur){return '<div class="mini-shell"><div class="mini-banner"><div class="mini-title">🧠 Farbfolge</div><div class="mini-sub">Merke dir die Farben in der richtigen Reihenfolge und tippe sie danach nach.</div></div><div class="memory-stage"><div id="memoryOrb" class="memory-orb"></div></div><div id="memoryProgress" class="memory-progress">Merken …</div><div class="memory-grid"><button class="memory-btn" data-mc="0" disabled>Lila</button><button class="memory-btn" data-mc="1" disabled>Grün</button><button class="memory-btn" data-mc="2" disabled>Orange</button><button class="memory-btn" data-mc="3" disabled>Blau</button></div></div>';}
+function miniBody(cur){if(cur.type==='zeichnen')return drawMiniHtml(cur);if(cur.type==='reaktion')return reactionMiniHtml(cur);if(cur.type==='taps')return tapMiniHtml(cur);if(cur.type==='farbfolge')return memoryMiniHtml(cur);return '';}
+function setupCanvas(){
+  var cur=state&&state.current;drawCanvas=document.getElementById('drawCanvas');if(!drawCanvas||!cur||cur.type!=='zeichnen')return;
+  var rect=drawCanvas.getBoundingClientRect(),dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));drawCanvas.width=Math.max(300,Math.round(rect.width*dpr));drawCanvas.height=drawCanvas.width;drawCtx=drawCanvas.getContext('2d');drawCtx.lineCap='round';drawCtx.lineJoin='round';drawCtx.fillStyle='#fff';drawCtx.fillRect(0,0,drawCanvas.width,drawCanvas.height);
+  var strokes=cur.strokes||[];for(var i=0;i<strokes.length;i++)paintStroke(strokes[i]);
+  if(!cur.isDrawer)return;
+  function pos(e){var r=drawCanvas.getBoundingClientRect();return{x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};}
+  drawCanvas.onpointerdown=function(e){e.preventDefault();try{drawCanvas.setPointerCapture(e.pointerId);}catch(x){}drawLast=pos(e);};
+  drawCanvas.onpointermove=function(e){if(!drawLast)return;e.preventDefault();var p=pos(e),s=[drawLast.x,drawLast.y,p.x,p.y,drawColor];paintStroke(s);var now=Date.now();if(now-drawLastSent>=28){send({t:'drawStroke',s:s});drawLastSent=now;}drawLast=p;};
+  drawCanvas.onpointerup=drawCanvas.onpointercancel=function(){drawLast=null;};
+}
+function paintStroke(s){if(!drawCtx||!drawCanvas||!s||s.length<5)return;var colors=['#171717','#8f5cff','#78b92f','#ff5f74'];drawCtx.strokeStyle=colors[Number(s[4])||0]||colors[0];drawCtx.lineWidth=Math.max(4,drawCanvas.width*.012);drawCtx.beginPath();drawCtx.moveTo(Number(s[0])*drawCanvas.width,Number(s[1])*drawCanvas.height);drawCtx.lineTo(Number(s[2])*drawCanvas.width,Number(s[3])*drawCanvas.height);drawCtx.stroke();}
+function drawRemoteStroke(s){paintStroke(s);}
+function clearDrawCanvas(){if(drawCtx&&drawCanvas){drawCtx.fillStyle='#fff';drawCtx.fillRect(0,0,drawCanvas.width,drawCanvas.height);}}
+function appendDrawGuess(m){var e=document.getElementById('miniGuessFeed');if(!e)return;var row=document.createElement('div');row.innerHTML='<b>'+esc(m.name||'')+'</b>: '+esc(m.guess||'');e.insertBefore(row,e.firstChild);while(e.children.length>8)e.removeChild(e.lastChild);}
+function setupReaction(){var cur=state&&state.current,pad=document.getElementById('reactionPad'),info=document.getElementById('reactionInfo');if(!cur||cur.type!=='reaktion'||!pad)return;function update(){if(reactionSent)return;var left=Number(cur.goAt||0)-Date.now();if(left<=0){pad.className='reaction-pad go';pad.textContent='JETZT!';if(info)info.textContent='LOS!';}else{pad.className='reaction-pad';pad.textContent='WARTEN …';}}update();var timer=setInterval(function(){if(!document.getElementById('reactionPad')||reactionSent){clearInterval(timer);return;}update();},40);pad.onclick=function(){if(reactionSent)return;reactionSent=true;send({t:'miniReact'});pad.className='reaction-pad done';pad.textContent=Date.now()<Number(cur.goAt||0)?'ZU FRÜH 😵':'GESCHAFFT!';if(info)info.textContent='Antwort gespeichert';};}
+function flushTaps(){if(tapPending>0){send({t:'miniTap',n:tapPending});tapPending=0;}}
+function setupTapBattle(){var cur=state&&state.current,pad=document.getElementById('tapPad'),count=document.getElementById('tapCount'),label=document.getElementById('tapLabel');if(!cur||cur.type!=='taps'||!pad)return;tapFlushTimer=setInterval(flushTaps,220);function update(){var now=Date.now(),start=Number(cur.startAt||0),end=Number(cur.endAt||0);if(now<start){pad.className='tap-pad';pad.textContent=Math.max(1,Math.ceil((start-now)/1000));if(label)label.textContent='Bereit machen';return;}if(now>=end){flushTaps();pad.disabled=true;pad.className='tap-pad';pad.textContent='STOPP';if(label)label.textContent='Finger überlebt?';if(tapFlushTimer){clearInterval(tapFlushTimer);tapFlushTimer=null;}return;}pad.disabled=false;pad.className='tap-pad live';pad.textContent='TAPPEN!';if(label)label.textContent=Math.max(0,((end-now)/1000)).toFixed(1)+' s';}update();var timer=setInterval(function(){if(!document.getElementById('tapPad')){clearInterval(timer);return;}update();},80);pad.onpointerdown=function(e){if(Date.now()<Number(cur.startAt||0)||Date.now()>=Number(cur.endAt||0))return;e.preventDefault();tapLocal++;tapPending++;if(count)count.textContent=String(tapLocal);};}
+function setupMemory(){var cur=state&&state.current,orb=document.getElementById('memoryOrb'),progress=document.getElementById('memoryProgress'),buttons=document.querySelectorAll('.memory-btn');if(!cur||cur.type!=='farbfolge'||!orb)return;var seq=cur.sequence||[],showAt=Number(cur.showAt||Date.now()),inputAt=Number(cur.inputAt||showAt+5000);function setOrb(c){orb.className='memory-orb'+(c===null?'':' c'+c);}for(var i=0;i<seq.length;i++){(function(idx){var on=showAt-Date.now()+idx*760;memoryTimers.push(setTimeout(function(){setOrb(seq[idx]);if(progress)progress.textContent='Farbe '+(idx+1)+' / '+seq.length;},Math.max(0,on)));memoryTimers.push(setTimeout(function(){setOrb(null);},Math.max(0,on+470)));})(i);}memoryTimers.push(setTimeout(function(){memoryReady=true;setOrb(null);if(progress)progress.textContent='Jetzt nachtippen · 0 / '+seq.length;for(var j=0;j<buttons.length;j++)buttons[j].disabled=false;},Math.max(0,inputAt-Date.now())));for(var j=0;j<buttons.length;j++)buttons[j].onclick=function(){if(!memoryReady)return;memoryInput.push(Number(this.getAttribute('data-mc')));if(progress)progress.textContent='Jetzt nachtippen · '+memoryInput.length+' / '+seq.length;if(memoryInput.length>=seq.length){memoryReady=false;for(var k=0;k<buttons.length;k++)buttons[k].disabled=true;send({t:'miniMemory',seq:memoryInput.slice(0,seq.length)});if(progress)progress.textContent='Gespeichert ✓';}};}
+function bindMiniGame(){var cur=state&&state.current;if(!cur||state.phase!=='question'||!isMiniType(cur.type))return;if(cur.type==='zeichnen'){setupCanvas();var colors=document.querySelectorAll('.draw-color');for(var i=0;i<colors.length;i++)colors[i].onclick=function(){drawColor=Number(this.getAttribute('data-c'))||0;for(var j=0;j<colors.length;j++)colors[j].classList.toggle('active',colors[j]===this);};var clear=document.getElementById('drawClear');if(clear)clear.onclick=function(){clearDrawCanvas();send({t:'drawClear'});};var f=document.getElementById('miniGuessForm');if(f)f.onsubmit=function(e){e.preventDefault();var input=document.getElementById('guessInput'),v=input.value.trim();if(v){send({t:'miniGuess',v:v});input.value='';input.focus();}};}if(cur.type==='reaktion')setupReaction();if(cur.type==='taps')setupTapBattle();if(cur.type==='farbfolge')setupMemory();}
+`;
+
+  html = mustReplace(html, 'function questionBody(cur){', functions + '\nfunction questionBody(cur){', 'minigame functions');
+
+  html = mustReplace(
+    html,
+    "  if(cur.type==='song')return cur.isHost?songHostHtml(cur):songPlayerHtml(cur);\n  return '';",
+    "  if(cur.type==='song')return cur.isHost?songHostHtml(cur):songPlayerHtml(cur);\n  if(isMiniType(cur.type))return miniBody(cur);\n  return '';",
+    'question body minigames'
+  );
+
+  html = mustReplace(
+    html,
+    "  var broken=document.getElementById('songBroken');if(broken)broken.onclick=function(){send({t:'songBroken'});};\n}\nfunction tick(){",
+    "  var broken=document.getElementById('songBroken');if(broken)broken.onclick=function(){send({t:'songBroken'});};\n  bindMiniGame();\n}\nfunction tick(){",
+    'bind minigames'
+  );
+
+  html = mustReplace(
+    html,
+    "  return out;\n}\nfunction resultsHtml(){",
+    "  if(r.miniRows&&r.miniRows.length){out+='<div class=\"mini-rank\">';for(i=0;i<r.miniRows.length;i++){g=r.miniRows[i];out+='<div class=\"mini-rank-row\"><span>'+(i+1)+'</span><span>'+esc(g.name)+'</span><strong>'+esc(g.label||g.value)+'</strong></div>';}out+='</div>';}\n  return out;\n}\nfunction resultsHtml(){",
+    'minigame result rows'
+  );
+
+  return html;
+};
