@@ -1,8 +1,8 @@
 {
   "name": "sueffiq",
-  "version": "5.1.0",
+  "version": "4.7.0",
   "private": true,
-  "description": "SüffIQ v5.1 – browser-first Multiplayer-Partyspiel mit YouTube-Songrunden, Zeitgefühl, Pong, Blackjack und Zeichen-Minispielen",
+  "description": "SüffIQ – browser-first Multiplayer-Partyspiel mit YouTube-Songrunden, Zeitgefühl, Pong, Blackjack und Zeichen-Minispielen",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
