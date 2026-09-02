@@ -82,10 +82,11 @@ module.exports = function hardenCore(core, replaceRequired) {
   );
 
   // An explicit Leave is different from a network drop: remove the player completely so they cannot ghost-rejoin.
+  // If the active Truth/Dare target leaves, immediately retarget instead of leaving the round stuck until timeout.
   core = replaceRequired(
     core,
     "    if (msg.t === 'leave') { leaveRoom(room, me); send(ws, { t: 'reset' }); room = null; me = null; return; }",
-    "    if (msg.t === 'leave') {\n      const oldRoom = room; const oldId = me; const wasHost = oldRoom.hostId === oldId;\n      send(ws, { t: 'reset' });\n      delete oldRoom.players[oldId];\n      oldRoom.order = oldRoom.order.filter((id) => id !== oldId);\n      if (wasHost) oldRoom.hostId = connectedIds(oldRoom)[0] || null;\n      room = null; me = null;\n      if (!connectedIds(oldRoom).length) { clearTimers(oldRoom); rooms.delete(oldRoom.code); return; }\n      if (oldRoom.phase === 'question' && allAnswered(oldRoom)) finishRound(oldRoom, 'complete');\n      else broadcast(oldRoom);\n      return;\n    }",
+    "    if (msg.t === 'leave') {\n      const oldRoom = room; const oldId = me; const wasHost = oldRoom.hostId === oldId;\n      send(ws, { t: 'reset' });\n      delete oldRoom.players[oldId];\n      oldRoom.order = oldRoom.order.filter((id) => id !== oldId);\n      if (wasHost) oldRoom.hostId = connectedIds(oldRoom)[0] || null;\n      room = null; me = null;\n      if (!connectedIds(oldRoom).length) { clearTimers(oldRoom); rooms.delete(oldRoom.code); return; }\n      if (oldRoom.phase === 'question' && ['wahrheit', 'pflicht'].includes(oldRoom.current?.type) && oldRoom.current.target === oldId) {\n        oldRoom.current.target = rand(connectedIds(oldRoom));\n        oldRoom.current.answers = {};\n        return broadcast(oldRoom);\n      }\n      if (oldRoom.phase === 'question' && allAnswered(oldRoom)) finishRound(oldRoom, 'complete');\n      else broadcast(oldRoom);\n      return;\n    }",
     'explicit leave removes player'
   );
 
