@@ -20,25 +20,21 @@ module.exports = function addShareFrontend(html) {
     'invite prefill'
   );
 
-  html = mustReplace(
-    html,
-    '<div class=\\\"note\\\">Mitspieler öffnen dieselbe Seite und geben diesen Code ein.</div></div><div class=\\\"section\\\">Kategorien</div>',
-    '<div class=\\\"note\\\">Mitspieler können den Code eingeben oder direkt deinen Einladungslink öffnen.</div><div class=\\\"invite-box\\\"><div id=\\\"inviteLink\\\" class=\\\"invite-link\\\">'+esc(location.origin+'/?room='+state.code)+'</div><button id=\\\"shareInvite\\\" class=\\\"btn secondary share-btn\\\">Einladen</button></div></div><div class=\\\"section\\\">Kategorien</div>',
-    'lobby invite button'
-  );
+  const helpers = `
+function shareInviteLink(){if(!state||!state.code)return;var url=location.origin+'/?room='+state.code,text='Komm in meine SüffIQ-Lobby · Code '+state.code;if(navigator.share){navigator.share({title:'SüffIQ',text:text,url:url}).catch(function(){});return;}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast('Einladungslink kopiert ✓');}).catch(function(){toast(url);});return;}toast(url);}
+function setupShareMasterUI(){
+  if(!state)return;
+  if(state.phase==='lobby'){
+    var code=document.querySelector('.big-code');var card=code&&code.parentElement;
+    if(card&&!document.getElementById('shareInvite')){var box=document.createElement('div');box.className='invite-box';box.innerHTML='<div class="invite-link">'+esc(location.origin+'/?room='+state.code)+'</div><button id="shareInvite" class="btn secondary share-btn">Einladen</button>';card.appendChild(box);var share=document.getElementById('shareInvite');if(share)share.onclick=shareInviteLink;}
+  }
+  if(state.you===state.hostId&&(state.phase==='results'||state.phase==='end')){
+    var rows=document.querySelectorAll('.presence-row');for(var i=0;i<rows.length&&i<state.players.length;i++){var p=state.players[i];if(!p.connected||p.id===state.you||rows[i].querySelector('.master-btn'))continue;var b=document.createElement('button');b.className='master-btn';b.textContent='Master geben';b.setAttribute('data-master',p.id);b.onclick=function(){send({t:'host',id:this.getAttribute('data-master')});};rows[i].appendChild(b);}
+  }
+}
+`;
 
-  html = mustReplace(
-    html,
-    "function presenceHtml(){var out='<div class=\"presence\">',i,p;for(i=0;i<state.players.length;i++){p=state.players[i];out+='<div class=\"presence-row\"><span class=\"presence-name\">'+esc(p.name)+(p.id===state.hostId?' 👑':'')+'</span><span class=\"presence-state '+(p.connected?'online':'offline')+'\"><span class=\"presence-dot\"></span>'+(p.connected?'noch dabei':'verbindung weg')+'</span></div>';}return out+'</div>';}",
-    "function presenceHtml(){var out='<div class=\"presence\">',i,p,master=state.you===state.hostId;for(i=0;i<state.players.length;i++){p=state.players[i];out+='<div class=\"presence-row\"><span class=\"presence-name\">'+esc(p.name)+(p.id===state.hostId?' 👑':'')+'</span><span class=\"presence-actions\"><span class=\"presence-state '+(p.connected?'online':'offline')+'\"><span class=\"presence-dot\"></span>'+(p.connected?'noch dabei':'verbindung weg')+'</span>'+(master&&p.connected&&p.id!==state.you?'<button class=\"master-btn\" data-master=\"'+esc(p.id)+'\">Master geben</button>':'')+'</span></div>';}return out+'</div>';}"
-  );
-
-  html = mustReplace(
-    html,
-    "  var allCats=document.getElementById('allCats');if(allCats)allCats.onclick=function(){send({t:'allCats'});};",
-    "  var shareInvite=document.getElementById('shareInvite');if(shareInvite)shareInvite.onclick=function(){var url=location.origin+'/?room='+state.code,text='Komm in meine SüffIQ-Lobby · Code '+state.code;if(navigator.share){navigator.share({title:'SüffIQ',text:text,url:url}).catch(function(){});}else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast('Einladungslink kopiert ✓');}).catch(function(){toast(url);});}else{toast(url);}};\n  var masterBtns=document.querySelectorAll('.master-btn');for(i=0;i<masterBtns.length;i++)masterBtns[i].onclick=function(){send({t:'host',id:this.getAttribute('data-master')});};\n  var allCats=document.getElementById('allCats');if(allCats)allCats.onclick=function(){send({t:'allCats'});};",
-    'share/master bind'
-  );
-
+  html = mustReplace(html, 'function bind(){', helpers + '\nfunction bind(){', 'share helpers');
+  html = mustReplace(html, '  bindMiniGame();\n}', '  bindMiniGame();setupShareMasterUI();\n}', 'share/master setup');
   return html;
 };
