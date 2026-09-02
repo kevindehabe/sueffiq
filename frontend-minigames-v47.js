@@ -35,7 +35,7 @@ var v47CategoryPickerHtml=categoryPickerHtml;
 categoryPickerHtml=function(){
   var out=v47CategoryPickerHtml();
   if(!state||!state.cats||!state.cats.minigame)return out;
-  var activeCats=state.selectedCats||[],types=state.miniTypes||{},keys=Object.keys(types),selected=state.selectedMiniTypes||keys,host=state.you===state.hostId;
+  var activeCats=state.selectedCats||[],types=state.miniTypes||{},keys=['zeichnen','allemalen','reaktion','taps','farbfolge','pong','blackjack'].filter(function(k){return !!types[k];}),selected=state.selectedMiniTypes||keys,host=state.you===state.hostId;
   if(activeCats.indexOf('minigame')<0||!keys.length)return out;
   var sub='<div class="mini-subpick"><div class="mini-subpick-title"><span>🎮 Minigames einzeln</span>'+(host?'<button id="allMinis" class="mini">Alle</button>':'')+'</div><div class="mini-subgrid">';
   for(var i=0;i<keys.length;i++){var k=keys[i],on=selected.indexOf(k)>=0,label=types[k]||k;sub+=host?'<button class="mini-toggle '+(on?'active':'')+'" data-mini="'+esc(k)+'">'+esc(label)+'</button>':'<div class="mini-view '+(on?'active':'')+'">'+esc(label)+'</div>';}
