@@ -1,3 +1,3 @@
 'use strict';
-// Production entrypoint: YouTube playback, no party-rule rounds, fixed Zeitgefühl minigame.
-require('./server-v51');
+// Production entrypoint: YouTube playback, no party-rule rounds, fixed Zeitgefühl + Logo minigames.
+require('./server-v512');
