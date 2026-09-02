@@ -43,8 +43,16 @@ async function assertOfflineShell(browser) {
   await page.evaluate(async () => {
     if (!('serviceWorker' in navigator)) throw new Error('service workers unsupported');
     await navigator.serviceWorker.ready;
+    if (navigator.serviceWorker.controller) return;
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('service worker did not take control')), 5000);
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        clearTimeout(timer);
+        resolve();
+      }, { once: true });
+    });
   });
-  await page.waitForTimeout(250);
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 5000 });
   await context.setOffline(true);
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 10000 });
   await page.locator('#create').waitFor({ state: 'visible' });
