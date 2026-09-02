@@ -62,7 +62,7 @@ async function onlyCategory(host, state, wanted) {
 test.before(async () => {
   child = spawn(process.execPath, ['server-v3.js'], {
     cwd: path.join(__dirname, '..'),
-    env: { ...process.env, PORT: String(PORT), CI: 'true', SUEFFIQ_FORCE_RULES: 'true' },
+    env: { ...process.env, PORT: String(PORT), CI: 'true' },
     stdio: ['ignore', 'ignore', 'pipe'],
   });
   let stderr = '';
@@ -70,13 +70,15 @@ test.before(async () => {
   child.once('exit', (code) => { if (code && stderr) process.stderr.write(stderr); });
   const health = await waitHealth();
   assert.equal(health.ok, true);
-  assert.equal(health.ruleRounds, true);
-  assert.equal(health.songProxy, true);
+  assert.equal(health.ruleRounds, false);
+  assert.equal(health.songSource, 'youtube');
+  assert.equal(health.youtubePlayback, true);
+  assert.equal(health.blindTimer, true);
 });
 
 test.after(async () => { if (child && !child.killed) child.kill('SIGTERM'); await sleep(150); });
 
-test('everyone acknowledges a standalone rule round before the host continues', async () => {
+test('normal rounds start directly without a rule interstitial', async () => {
   const host = await new Client().open();
   host.send({ t: 'create', name: 'Host' });
   const hostJoined = await host.wait((message) => message.t === 'joined');
@@ -90,74 +92,58 @@ test('everyone acknowledges a standalone rule round before the host continues', 
   hostState = await onlyCategory(host, hostState, 'schaetz');
 
   host.send({ t: 'start' });
-  const hostRule = await host.state((state) => state.phase === 'rule');
-  const guestRule = await guest.state((state) => state.phase === 'rule');
-  assert.equal(hostRule.round, 0);
-  assert.equal(hostRule.current, null);
-  assert.equal(hostRule.activeRules.length, 0);
-  assert.equal(hostRule.ruleRound.total, 2);
-  assert.equal(hostRule.ruleRound.allSeen, false);
-  assert.equal(guestRule.ruleRound.id, hostRule.ruleRound.id);
-  host.send({ t: 'ruleContinue' });
-  const blocked = await host.wait((message) => message.t === 'error');
-  assert.match(blocked.m, /alle die Regel gesehen/);
-
-  guest.send({ t: 'ruleSeen' });
-  await guest.state((state) => state.phase === 'rule' && state.ruleRound.youSeen && state.ruleRound.seenCount === 1);
-  await host.state((state) => state.phase === 'rule' && state.ruleRound.seenCount === 1);
-
-  host.send({ t: 'ruleSeen' });
-  const readyHost = await host.state((state) => state.phase === 'rule' && state.ruleRound.allSeen);
-  await guest.state((state) => state.phase === 'rule' && state.ruleRound.allSeen);
-  assert.equal(readyHost.ruleRound.seenCount, 2);
-
-  host.send({ t: 'ruleContinue' });
   const questionHost = await host.state((state) => state.phase === 'question' && state.current?.type === 'schaetz');
   const questionGuest = await guest.state((state) => state.phase === 'question' && state.current?.type === 'schaetz');
   assert.equal(questionHost.round, 1);
-  assert.equal(questionHost.ruleRound, null);
-  assert.equal(questionHost.activeRules.length, 1);
-  assert.equal(questionHost.activeRules[0].id, hostRule.ruleRound.id);
-  assert.equal(questionHost.activeRules[0].text, hostRule.ruleRound.text);
-  assert.equal(questionHost.activeRules[0].expiresRound - questionHost.activeRules[0].startRound + 1, 10);
-  assert.deepEqual(questionGuest.activeRules, questionHost.activeRules);
+  assert.equal(questionGuest.round, 1);
+  assert.equal('ruleRound' in questionHost, false);
+  assert.equal('activeRules' in questionHost, false);
 
   host.send({ t: 'answer', v: '1' });
   guest.send({ t: 'answer', v: '2' });
-  const result = await host.state((state) => state.phase === 'results');
-  assert.equal(result.activeRules.length, 1);
+  await host.state((state) => state.phase === 'results');
 
   await host.close();
   await guest.close();
 });
 
-test('song rounds expose a same-origin playable preview and synchronize that URL', async () => {
+test('song rounds use YouTube IDs and synchronize the same start on every phone', async () => {
   const host = await new Client().open();
   host.send({ t: 'create', name: 'DJ' });
   const joined = await host.wait((message) => message.t === 'joined');
   let state = await host.state((next) => next.phase === 'lobby');
+
+  const guest = await new Client().open();
+  guest.send({ t: 'join', code: joined.code, name: 'Gast' });
+  await guest.wait((message) => message.t === 'joined');
+  await guest.state((next) => next.phase === 'lobby' && next.players.filter((player) => player.connected).length === 2);
+  state = await host.state((next) => next.phase === 'lobby' && next.players.filter((player) => player.connected).length === 2);
   state = await onlyCategory(host, state, 'song');
 
   host.send({ t: 'start' });
-  await host.state((next) => next.phase === 'rule');
-  host.send({ t: 'ruleSeen' });
-  await host.state((next) => next.phase === 'rule' && next.ruleRound.allSeen);
-  host.send({ t: 'ruleContinue' });
-  const song = await host.state((next) => next.phase === 'question' && next.current?.type === 'song');
-  assert.equal(song.code, joined.code);
-  assert.match(song.current.previewUrl, new RegExp(`^/api/song-preview/${joined.code}/1$`));
+  const songHost = await host.state((next) => next.phase === 'question' && next.current?.type === 'song');
+  const songGuest = await guest.state((next) => next.phase === 'question' && next.current?.type === 'song');
+  assert.equal(songHost.code, joined.code);
+  assert.equal(typeof songHost.current.videoId, 'string');
+  assert.ok(songHost.current.videoId.length >= 6);
+  assert.equal(songGuest.current.videoId, songHost.current.videoId);
+  assert.equal(songHost.current.previewUrl, undefined);
 
-  const preview = await fetch(`${HTTP}${song.current.previewUrl}`);
-  assert.equal(preview.status, 200);
-  assert.match(preview.headers.get('content-type') || '', /^audio\/wav/);
-  assert.ok((await preview.arrayBuffer()).byteLength > 20);
-
+  const before = Date.now();
   host.send({ t: 'songPlay' });
-  const play = await host.wait((message) => message.t === 'songPlay');
-  assert.equal(play.previewUrl, song.current.previewUrl);
-  assert.ok(play.at > Date.now());
-  const playing = await host.state((next) => next.phase === 'question' && Number(next.current?.songStartedAt) === play.at);
-  assert.equal(playing.current.previewUrl, song.current.previewUrl);
+  const [playHost, playGuest] = await Promise.all([
+    host.wait((message) => message.t === 'songPlay'),
+    guest.wait((message) => message.t === 'songPlay'),
+  ]);
+  assert.equal(playHost.videoId, songHost.current.videoId);
+  assert.equal(playGuest.videoId, playHost.videoId);
+  assert.equal(playGuest.startSeconds, playHost.startSeconds);
+  assert.equal(playGuest.at, playHost.at);
+  assert.ok(playHost.at >= before + 800 && playHost.at <= Date.now() + 2500);
+
+  const playing = await host.state((next) => next.phase === 'question' && Number(next.current?.songStartedAt) === playHost.at);
+  assert.equal(playing.current.videoId, playHost.videoId);
 
   await host.close();
+  await guest.close();
 });
