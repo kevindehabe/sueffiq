@@ -1,5 +1,5 @@
 'use strict';
 
-// Compatibility entry point for existing Render services that still start `node server-v3.js`.
-// Production shell lives in server-v5.js and proxies the v4 game core.
-require('./server-v5');
+// Compatibility entry point for the existing Render service (`node server-v3.js`).
+// Production shell lives in server-v6.js.
+require('./server-v6');
