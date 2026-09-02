@@ -24,6 +24,17 @@ async function assertNoHorizontalOverflow(page, label) {
   assert.ok(dims.scrollWidth <= dims.width + 2, `${label}: horizontal overflow ${dims.scrollWidth}px > ${dims.width}px`);
 }
 
+async function keepOnly(page, keep) {
+  const active = await page.locator('.cat-toggle.active').evaluateAll((nodes) => nodes.map((n) => n.getAttribute('data-cat')));
+  for (const cat of active) {
+    if (cat === keep) continue;
+    await page.locator(`button[data-cat="${cat}"]`).click();
+    await page.waitForTimeout(30);
+  }
+  await page.locator(`button[data-cat="${keep}"].active`).waitFor();
+  assert.equal(await page.locator('.cat-toggle.active').count(), 1);
+}
+
 async function runBrowser(browserType, name) {
   const browser = await browserType.launch({ headless: true });
   try {
@@ -65,15 +76,8 @@ async function runBrowser(browserType, name) {
     await assertNoHorizontalOverflow(guest, `${name} guest lobby`);
 
     // Select only estimates from the UI. Re-render after every toggle is intentional.
-    const categories = ['nie','wahl','oder','trivia','wahrheit','pflicht','person','bild','song','mehrheit','skala'];
-    for (const cat of categories) {
-      const button = host.locator(`button[data-cat="${cat}"]`);
-      await button.click();
-      await host.waitForTimeout(35);
-    }
-    await host.locator('button[data-cat="schaetz"].active').waitFor();
+    await keepOnly(host, 'schaetz');
     await guest.locator('button[data-cat="schaetz"].active').waitFor();
-    assert.equal(await host.locator('.cat-toggle.active').count(), 1);
 
     await host.locator('#start').click();
     await host.locator('#estimateInput').waitFor({ state: 'visible' });
@@ -88,12 +92,12 @@ async function runBrowser(browserType, name) {
     await guest.locator('#estimate').evaluate((form) => form.requestSubmit());
     await host.getByText('Nächste Runde', { exact: true }).waitFor({ state: 'visible' });
 
-    // Leave from a fresh lobby flow; explicit leave must return to the landing screen.
     await host.locator('#end').click();
     await host.getByText('Game Over', { exact: false }).waitFor({ state: 'visible' });
     await guest.getByText('Game Over', { exact: false }).waitFor({ state: 'visible' });
+    await assertNoHorizontalOverflow(host, `${name} game over`);
 
-    // New room solely to verify the lobby leave button on a phone.
+    // New room solely to verify the lobby leave button on a narrow phone.
     const leaveContext = await browser.newContext({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
     const leavePage = await leaveContext.newPage();
     await leavePage.goto(URL, { waitUntil: 'domcontentloaded' });
@@ -104,6 +108,43 @@ async function runBrowser(browserType, name) {
     await leavePage.locator('#create').waitFor({ state: 'visible' });
     await assertNoHorizontalOverflow(leavePage, `${name} post-leave landing`);
 
+    // Rendering untrusted player names must stay text, never become HTML.
+    const xssContext = await browser.newContext({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true });
+    const xss = await xssContext.newPage();
+    await xss.goto(URL, { waitUntil: 'domcontentloaded' });
+    await xss.locator('#name').fill('<img src=x>');
+    await xss.locator('#create').click();
+    await xss.locator('.pname').waitFor({ state: 'visible' });
+    assert.equal(await xss.locator('.pname img').count(), 0, `${name}: player name became executable HTML`);
+    assert.match(await xss.locator('.pname').textContent(), /<img src=x>/);
+
+    // Critical iPhone regression: automatic person hints must not replace/focus-away the guess input.
+    // WebKit is the meaningful Safari approximation; run it there to keep CI duration reasonable.
+    if (name.includes('WebKit')) {
+      await keepOnly(xss, 'person');
+      await xss.locator('#start').click();
+      await xss.locator('#guessInput').waitFor({ state: 'visible' });
+      const initialHints = await xss.locator('.hint').count();
+      await xss.locator('#guessInput').focus();
+      assert.equal(await xss.evaluate(() => document.activeElement && document.activeElement.id), 'guessInput');
+
+      // Wrong guesses are public but must also be escaped.
+      await xss.locator('#guessInput').fill('<img src=x>');
+      await xss.locator('#guessForm').evaluate((form) => form.requestSubmit());
+      await xss.locator('#guessFeed').waitFor({ state: 'visible' });
+      assert.equal(await xss.locator('#guessFeed img').count(), 0, `${name}: guess feed became executable HTML`);
+      await xss.locator('#guessInput').focus();
+
+      await xss.waitForFunction((n) => document.querySelectorAll('.hint').length > n, initialHints, { timeout: 15000 });
+      assert.equal(await xss.evaluate(() => document.activeElement && document.activeElement.id), 'guessInput', `${name}: keyboard focus was lost when a hint arrived`);
+      await assertNoHorizontalOverflow(xss, `${name} person guess`);
+    }
+
+    // Very short landscape viewport should still not create horizontal scrolling.
+    await xss.setViewportSize({ width: 844, height: 390 });
+    await assertNoHorizontalOverflow(xss, `${name} landscape`);
+
+    await xssContext.close();
     await leaveContext.close();
     await guestContext.close();
     await hostContext.close();
