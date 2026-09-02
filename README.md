@@ -1,25 +1,27 @@
-# SüffIQ v2
+# SüffIQ v3
 
 SüffIQ ist ein mobiles Multiplayer-Partyspiel für mehrere Handys. Ein Spieler erstellt einen Raum, teilt den fünfstelligen Code und wird zum Roundmaster. Es gibt keine Accounts und kein Einstellungsmenü: Der Kategorienmix läuft automatisch.
 
 ## Enthalten
 
-- 240 eigene Karten in 10 Kategorien
-- Ich hab noch nie
+- 11 automatisch gemischte Kategorien
+- Ich hab noch nie – inklusive frecherem 18+-Mix
 - Wahl: jede Stimme = 1 Schluck, maximal 5
-- Schätzfragen: je weiter daneben, desto mehr Schlücke; Gleichstand beim besten Tipp bleibt trocken
+- Schätzfragen: beste Schätzung bleibt trocken, größere Abweichung bedeutet mehr Schlücke
 - Entweder oder
-- Quiz
-- Wahrheit
-- Pflicht mit „Mache ich“ / „Trinke lieber“
-- Errate die Person: 45 Sekunden, 5 automatisch nacheinander freigegebene Hinweise, beliebig viele Versuche, Vor- oder Nachname genügt, Tippfehler können als „nah dran“ gelten
-- Bei „Errate die Person“ sehen alle falsche Tipps; nahe und richtige Tipps bleiben geheim
+- 4-Antwort-Quiz mit Allgemeinwissen, Sport, Musik, Popkultur und Gaming
+- Wahrheit 18+
+- Pflicht mit „Gemacht“ / „Lieber trinken“
+- Errate die Person: fünf Hinweise erscheinen automatisch nacheinander
+- Neue Bildrunde „Wer ist das?“: bekannte Personen starten stark verschwommen und werden in fünf Stufen automatisch schärfer
+- Bei Personen- und Bildrunden bleiben richtige und nahe Tipps privat; klar falsche Tipps sehen alle
 - Mehrheit
 - Skala 1–10
 - Beitritt auch während einer laufenden Runde
 - Automatische Auswertung bei vollständigen Antworten oder Ablauf des Timers
 - Roundmaster kann an einen anderen verbundenen Spieler übergeben werden
-- Reconnect per lokal gespeicherter Raum-/Spieler-ID
+- Reconnect über lokal gespeicherte Raum-/Spieler-ID
+- Mobile Oberfläche für iPhone und Android
 
 ## Lokal starten
 
@@ -28,7 +30,7 @@ npm install
 npm start
 ```
 
-Dann `http://localhost:3000` öffnen. Andere Geräte im selben WLAN können die beim Start ausgegebene lokale IP verwenden.
+Danach `http://localhost:3000` öffnen. Andere Geräte im selben WLAN können die beim Start ausgegebene lokale IP verwenden.
 
 ## Tests
 
@@ -44,8 +46,12 @@ npm run check
 
 ## Render
 
-`render.yaml` ist für einen Node-Web-Service vorbereitet. Nach Verbindung des GitHub-Repositories mit Render genügt der normale Blueprint-/Web-Service-Deploy. Der Healthcheck liegt unter `/health`.
+`render.yaml` ist für einen Node-Web-Service vorbereitet. `npm start` startet SüffIQ v3 über `server-v3.js`. Der Healthcheck liegt unter `/health`; Auto-Deploy ist in der Render-Konfiguration aktiviert.
+
+## Musikmodus
+
+Ein Song-Erraten-Modus ist noch nicht aktiviert. Frei abrufbare iTunes-Previews sind laut Apples Nutzungsbedingungen nicht für ein eigenständiges Musikquiz gedacht; bei Spotify kann automatisches Abspielen auf mobilen Browsern zusätzlich durch Autoplay-Regeln blockiert werden. Deshalb wird keine unzuverlässige oder nicht zulässige Audioquelle fest eingebaut.
 
 ## Hinweis
 
-SüffIQ ist als Partyspiel für Erwachsene gedacht. Die angezeigten „Schlücke“ sind Spielpunkte; niemand muss Alkohol trinken.
+SüffIQ ist als Partyspiel für Erwachsene gedacht. Die angezeigten „Schlücke“ sind Spielpunkte; Alkohol ist nicht erforderlich.
