@@ -1,6 +1,6 @@
 'use strict';
 
-// SüffIQ v4.4 bootstrap: extends the v4.3 production shell with lobby category selection.
+// SüffIQ v4.5 bootstrap: lobby categories + hardened multiplayer/PWA layer.
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
@@ -11,12 +11,12 @@ const runtimePath = path.join(__dirname, `.server-v7-category-runtime-${process.
 let source = fs.readFileSync(sourcePath, 'utf8');
 
 function replaceRequired(text, needle, replacement, label) {
-  if (!text.includes(needle)) throw new Error(`v4.4 patch fehlt: ${label}`);
+  if (!text.includes(needle)) throw new Error(`v4.5 patch fehlt: ${label}`);
   return text.replace(needle, replacement);
 }
 
 const coreInjection = String.raw`
-  // v4.4: Kategorien werden pro Lobby vom Host gewählt.
+  // Kategorien werden pro Lobby vom Host gewählt.
   core = replaceRequired(
     core,
     "    code: makeCode(), hostId: null, players: {}, order: [], phase: 'lobby', round: 0,\n    current: null, lastResult: null, used: {}, deck: [], lastCat: null, timers: [], createdAt: Date.now(),",
@@ -46,17 +46,19 @@ const coreInjection = String.raw`
     "    const isHost = room.hostId === me;\n    if (msg.t === 'toggleCat' && isHost && (room.phase === 'lobby' || room.phase === 'end')) {\n      const cat = String(msg.cat || '');\n      if (!CATEGORY_ORDER.includes(cat) || !Array.isArray(Q[cat]) || !Q[cat].length) return;\n      const selected = Array.isArray(room.selectedCats) && room.selectedCats.length ? [...room.selectedCats] : [...CATEGORY_ORDER];\n      const idx = selected.indexOf(cat);\n      if (idx >= 0) {\n        if (selected.length <= 1) return error('Mindestens eine Kategorie muss aktiv bleiben.');\n        selected.splice(idx, 1);\n      } else selected.push(cat);\n      room.selectedCats = CATEGORY_ORDER.filter((x) => selected.includes(x));\n      room.deck = []; room.lastCat = null;\n      return broadcast(room);\n    }\n    if (msg.t === 'allCats' && isHost && (room.phase === 'lobby' || room.phase === 'end')) {\n      room.selectedCats = [...CATEGORY_ORDER]; room.deck = []; room.lastCat = null; return broadcast(room);\n    }\n    if (msg.t === 'start' && isHost && (room.phase === 'lobby' || room.phase === 'end')) {",
     'category websocket controls'
   );
+
+  core = require('./hardening-v45')(core, replaceRequired);
 `;
 
 source = replaceRequired(
   source,
   "  core = core.replace(/version: '4\\.0\\.0'/g, \"version: '4.3.0'\");",
-  coreInjection + "\n  core = core.replace(/version: '4\\.0\\.0'/g, \"version: '4.4.0'\");",
-  'inject core category patches'
+  coreInjection + "\n  core = core.replace(/version: '4\\.0\\.0'/g, \"version: '4.5.0'\");",
+  'inject core category/hardening patches'
 );
 
 const frontendInjection = String.raw`
-  // v4.4: Kategorieauswahl in der Lobby.
+  // Kategorieauswahl in der Lobby.
   html = html.replace(
     '</style>',
     '.cat-tools{display:flex;gap:8px;margin-bottom:9px}.cat-tools .mini{flex:1}.cat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.cat-toggle,.cat-view{min-height:46px;border-radius:13px;padding:10px 11px;border:1px solid var(--line);background:#15101e;color:#8d8298;font-weight:850;font-size:12px;text-align:left}.cat-toggle{cursor:pointer}.cat-toggle.active,.cat-view.active{color:#11170a;background:var(--accent);border-color:var(--accent)}.cat-view{opacity:.85}.cat-help{color:var(--muted);font-size:11px;line-height:1.4;margin:8px 1px 12px}@media(max-width:380px){.cat-grid{grid-template-columns:1fr}}</style>'
@@ -71,16 +73,25 @@ const frontendInjection = String.raw`
     "  var leave=document.getElementById('leaveLobby');if(leave)leave.onclick=function(){send({t:'leave'});clearJoin();state=null;feedback=null;render();};",
     "  var leave=document.getElementById('leaveLobby');if(leave)leave.onclick=function(){send({t:'leave'});clearJoin();state=null;feedback=null;render();};\n  var allCats=document.getElementById('allCats');if(allCats)allCats.onclick=function(){send({t:'allCats'});};\n  var catBtns=document.querySelectorAll('.cat-toggle');for(i=0;i<catBtns.length;i++)catBtns[i].onclick=function(){send({t:'toggleCat',cat:this.getAttribute('data-cat')});};"
   );
+
+  html = require('./frontend-v45')(html);
 `;
 
 source = replaceRequired(
   source,
   "  return html;\n}\n\nconst server = http.createServer",
   frontendInjection + "\n  return html;\n}\n\nconst server = http.createServer",
-  'inject lobby category frontend'
+  'inject lobby/mobile frontend'
 );
 
-source = source.replace(/4\.3\.0/g, '4.4.0').replace(/v4\.3/g, 'v4.4').replace(/SueffIQ\/4\.3/g, 'SueffIQ/4.4');
+source = replaceRequired(
+  source,
+  "const server = http.createServer((req, res) => {",
+  "const pwaHandler = require('./pwa-v45');\n\nconst server = http.createServer((req, res) => {\n  if (pwaHandler(req, res)) return;",
+  'PWA routes'
+);
+
+source = source.replace(/4\.3\.0/g, '4.5.0').replace(/v4\.3/g, 'v4.5').replace(/SueffIQ\/4\.3/g, 'SueffIQ/4.5');
 fs.writeFileSync(runtimePath, source, 'utf8');
 
 const child = spawn(process.execPath, [runtimePath], { env: process.env, stdio: 'inherit' });
