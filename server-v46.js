@@ -20,6 +20,7 @@ src = replaceRequired(
 );
 
 src = replaceRequired(src, "const VERSION = '4.5.0';", "const VERSION = '4.6.0';", 'version');
+src = replaceRequired(src, "result.lines.push('Schnell erkannt = trocken oder ein Schluck; nicht erkannt = drei.');", "result.lines.push('Je schneller erkannt, desto weniger Schlücke; nicht erkannt = drei.');", 'song result wording');
 src = replaceRequired(src, 'Q.song = songs;', "Q.song = songs;\nQ.minigame = ['arcade'];", 'minigame pool');
 
 src = replaceRequired(src, "  skala: 'Skala',\n};", "  skala: 'Skala',\n  minigame: 'Minigames',\n};", 'category');
