@@ -25,19 +25,32 @@ src = replaceRequired(src, 'Q.song = songs;', "Q.song = songs;\nQ.minigame = ['a
 
 src = replaceRequired(src, "  skala: 'Skala',\n};", "  skala: 'Skala',\n  minigame: 'Minigames',\n};", 'category');
 src = replaceRequired(src, "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30,\n};", "  pflicht: 35, person: 45, bild: 30, song: 55, mehrheit: 30, skala: 30, minigame: 30,\n};", 'round seconds');
-src = replaceRequired(src, "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n  };", "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n    miniQueue: [], lastMini: null, lastDrawer: null,\n  };", 'room minigame state');
+src = replaceRequired(src, "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n  };", "    selectedCats: [...CATEGORY_ORDER], socialFlip: undefined, adultFlip: undefined, groupFlip: undefined,\n    miniQueue: [], lastMini: null, lastDrawer: null, miniDrawTurn: true,\n  };", 'room minigame state');
 
 src = replaceRequired(src, "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group]\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);", "    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame']\n      .filter((cat) => selected.includes(cat) && Array.isArray(Q[cat]) && Q[cat].length);", 'default minigame frequency');
 src = replaceRequired(src, "    const customWeights = { schaetz: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };", "    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };", 'custom minigame weight');
+src = replaceRequired(src, "  deck = shuffle(deck);\n  if (deck.length > 1 && deck[0] === room.lastCat) {", `  deck = shuffle(deck);
+  if (selected.length === CATEGORY_ORDER.length && selected.includes('minigame') && connectedIds(room).length >= 2) {
+    const firstMini = deck.findIndex((cat) => cat === 'minigame');
+    if (firstMini > 6) [deck[firstMini], deck[4]] = [deck[4], deck[firstMini]];
+    const miniSlots = deck.map((cat, i) => cat === 'minigame' ? i : -1).filter((i) => i >= 0);
+    const lateMini = miniSlots.find((i) => i > 9);
+    if (lateMini !== undefined) [deck[lateMini], deck[8]] = [deck[8], deck[lateMini]];
+  }
+  if (deck.length > 1 && deck[0] === room.lastCat) {`, 'minigames early in default deck');
 
 const miniHelpers = `const MINI_LABELS = { zeichnen: 'Zeichnen & Raten', reaktion: 'Reaktionstest', taps: 'Tap Battle', farbfolge: 'Farbfolge merken' };
 function nextMiniType(room) {
-  const allowed = connectedIds(room).length >= 2 ? MINI_TYPES : MINI_TYPES.filter((x) => x !== 'zeichnen');
+  const multiplayer = connectedIds(room).length >= 2;
+  if (multiplayer && room.miniDrawTurn !== false) {
+    room.miniDrawTurn = false; room.lastMini = 'zeichnen'; return 'zeichnen';
+  }
+  const allowed = MINI_TYPES.filter((x) => x !== 'zeichnen');
   if (!room.miniQueue.length || room.miniQueue.some((x) => !allowed.includes(x))) {
     room.miniQueue = shuffle(allowed);
     if (room.miniQueue.length > 1 && room.miniQueue[0] === room.lastMini) [room.miniQueue[0], room.miniQueue[1]] = [room.miniQueue[1], room.miniQueue[0]];
   }
-  const type = room.miniQueue.shift(); room.lastMini = type; return type;
+  const type = room.miniQueue.shift(); room.lastMini = type; if (multiplayer) room.miniDrawTurn = true; return type;
 }
 function miniLabel(type) { return MINI_LABELS[type] || 'Minigame'; }
 function pickDrawPrompt(room) {
@@ -71,8 +84,8 @@ src = replaceRequired(src, "  if (cur.type === 'wahrheit' || cur.type === 'pflic
       base.prompt = base.isDrawer ? cur.prompt : null; base.strokes = cur.strokes.slice(-1200); base.guessFeed = cur.guessFeed.slice(-20);
       base.yourStatus = cur.miniCorrect[forId] ? { status: 'correct' } : cur.miniNear[forId] ? { status: 'near' } : null;
     }
-    if (cur.miniType === 'reaktion') base.goAt = cur.goAt;
-    if (cur.miniType === 'taps') { base.startAt = cur.startAt; base.endAt = cur.endAt; }
+    if (cur.miniType === 'reaktion') { base.goAt = cur.goAt; base.yourReaction = cur.answers[forId] || null; }
+    if (cur.miniType === 'taps') { base.startAt = cur.startAt || null; base.endAt = cur.endAt || null; }
     if (cur.miniType === 'farbfolge') { base.sequence = cur.sequence; base.showAt = cur.showAt; base.inputAt = cur.inputAt; }
   }
   if (cur.type === 'wahrheit' || cur.type === 'pflicht') base.isTarget = cur.target === forId;`, 'public minigame fields');
@@ -91,8 +104,8 @@ const minigameFinish = `  if (cur.type === 'minigame') {
     if (cur.miniType === 'reaktion') {
       const input = {}; ids.forEach((id) => { input[id] = cur.answers[id] || { falseStart: true, ms: 0 }; });
       const out = reactionResults(input); Object.assign(sipMap, out.sips);
-      result.miniRows = out.ranked.map((row) => ({ name: displayName(room, row.id), label: row.falseStart ? 'Fehlstart' : Math.round(row.value) + ' ms' }));
-      result.lines.push('Schnellste Reaktion gewinnt. Fehlstart kostet zwei Schlücke.');
+      result.miniRows = out.ranked.map((row) => ({ name: displayName(room, row.id), label: row.falseStart ? 'DNF · zu früh' : Math.round(row.value) + ' ms' }));
+      result.lines.push('Schnellste gültige Reaktion gewinnt. Zu früh = DNF und zwei Schlücke.');
     }
     if (cur.miniType === 'taps') {
       const counts = {}; ids.forEach((id) => { counts[id] = Number(cur.tapCounts[id] || 0); });
@@ -123,8 +136,8 @@ src = replaceRequired(src, "  if (type === 'song') { cur.text = 'Welcher Song l�
   if (type === 'minigame') {
     cur.miniType = nextMiniType(room); cur.label = miniLabel(cur.miniType); const now = Date.now();
     if (cur.miniType === 'zeichnen') { total = 45; cur.text = 'Zeichnen & Raten'; cur.drawerId = chooseDrawer(room); room.lastDrawer = cur.drawerId; cur.prompt = pickDrawPrompt(room); cur.startedAt = now; cur.strokes = []; cur.guessFeed = []; cur.miniCorrect = {}; cur.miniNear = {}; }
-    if (cur.miniType === 'reaktion') { total = 9; cur.text = 'Tippe erst, wenn die Fläche grün wird!'; cur.goAt = now + 1900 + Math.floor(Math.random() * 2600); }
-    if (cur.miniType === 'taps') { total = 11; cur.text = 'Wer tippt in 7 Sekunden am häufigsten?'; cur.startAt = now + 1500; cur.endAt = cur.startAt + 7000; cur.tapCounts = {}; }
+    if (cur.miniType === 'reaktion') { total = 9; cur.text = 'Tippe erst, wenn die Fläche grün wird!'; cur.goAt = now + 1900 + Math.floor(Math.random() * 2600); cur.lastFalseStartAt = 0; }
+    if (cur.miniType === 'taps') { total = 14; cur.text = 'Erster Tap startet für alle den Countdown. Danach laufen 7 Sekunden.'; cur.startAt = null; cur.endAt = null; cur.tapCounts = {}; }
     if (cur.miniType === 'farbfolge') { total = 15; cur.text = 'Merke dir die Farbfolge.'; cur.sequence = randomSequence(6); cur.showAt = now + 900; cur.inputAt = cur.showAt + cur.sequence.length * 760 + 650; }
     cur.total = total;
   }
@@ -148,11 +161,18 @@ const miniHandlers = `    if (msg.t === 'miniGuess' && room.phase === 'question'
     }
     if (msg.t === 'drawClear' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'zeichnen' && room.current.drawerId === me) { room.current.strokes = []; sendExcept(room, me, { t: 'drawClear' }); return; }
     if (msg.t === 'miniReact' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'reaktion') {
-      const cur = room.current; if (cur.answers[me] !== undefined) return; const now = Date.now(); cur.answers[me] = { falseStart: now < cur.goAt, ms: Math.max(0, now - cur.goAt) };
-      if (allAnswered(room)) finishRound(room, 'complete'); else broadcast(room); return;
+      const cur = room.current; if (cur.answers[me] !== undefined) return; const now = Date.now(); const falseStart = now < cur.goAt; cur.answers[me] = { falseStart, ms: Math.max(0, now - cur.goAt) }; if (falseStart) cur.lastFalseStartAt = now;
+      if (allAnswered(room)) {
+        const hold = cur.lastFalseStartAt ? Math.max(0, 2600 - (now - cur.lastFalseStartAt)) : 0;
+        if (hold > 0) { const round = room.round; broadcast(room); addTimer(room, () => { if (room.phase === 'question' && room.round === round && room.current === cur) finishRound(room, 'complete'); }, hold); }
+        else finishRound(room, 'complete');
+      } else broadcast(room); return;
+    }
+    if (msg.t === 'miniTapStart' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'taps') {
+      const cur = room.current; if (cur.startAt || cur.endAt) return; const now = Date.now(); const round = room.round; cur.startAt = now + 1200; cur.endAt = cur.startAt + 7000; cur.total = 9; cur.deadline = cur.endAt + 500; clearTimers(room); addTimer(room, () => { if (room.phase === 'question' && room.round === round && room.current === cur) finishRound(room, 'timeout'); }, Math.max(250, cur.endAt - Date.now() + 250)); broadcast(room); return;
     }
     if (msg.t === 'miniTap' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'taps') {
-      const cur = room.current; const now = Date.now(); if (now < cur.startAt || now > cur.endAt + 500) return; const n = clamp(Math.round(Number(msg.n) || 0), 0, 30); if (!n) return; cur.tapCounts[me] = clamp((cur.tapCounts[me] || 0) + n, 0, 500); return;
+      const cur = room.current; const now = Date.now(); if (!cur.startAt || !cur.endAt || now < cur.startAt || now > cur.endAt + 500) return; const n = clamp(Math.round(Number(msg.n) || 0), 0, 30); if (!n) return; cur.tapCounts[me] = clamp((cur.tapCounts[me] || 0) + n, 0, 500); return;
     }
     if (msg.t === 'miniMemory' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'farbfolge') {
       const cur = room.current; if (cur.answers[me] !== undefined || Date.now() < cur.inputAt - 150) return; const seq = Array.isArray(msg.seq) ? msg.seq.slice(0, cur.sequence.length).map(Number) : [];
