@@ -1,14 +1,14 @@
 {
   "name": "sueffiq",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "private": true,
-  "description": "SüffIQ v4 – Multiplayer-Partyspiel mit YouTube-Songrunden ohne Anmeldung",
-  "main": "server-v4.js",
+  "description": "SüffIQ v4.1 – Multiplayer-Partyspiel mit SongGuesser-artigen YouTube-Songrunden",
+  "main": "server-v5.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server-v4.js",
+    "start": "node server-v5.js",
     "test": "node --test",
-    "check": "node -c server-v4.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
+    "check": "node -c server-v5.js && node -c server-v4.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
   },
   "engines": {
     "node": ">=20"
