@@ -57,9 +57,8 @@ module.exports = function tunePartyV49(html) {
 .party-rule-row{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.party-rule-row::-webkit-scrollbar{display:none}
 .party-rule-title{flex:0 0 auto;font-size:10px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .party-rule-chip{flex:0 0 auto;max-width:78vw;padding:7px 9px;border-radius:999px;background:#20172a;border:1px solid rgba(184,255,74,.18);font-size:10px;font-weight:850;white-space:nowrap;color:var(--text)}
-.party-event{margin-top:6px;padding:7px 9px;border-radius:11px;border:1px solid rgba(255,157,69,.24);background:rgba(255,157,69,.08);font-size:10px;font-weight:900;line-height:1.3;color:#ffd0a5}
-@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}.party-event{font-size:9.5px}}
-</style>`, 'Regeln/Events/Bild-CSS');
+@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}}
+</style>`, 'Regeln/Bild-CSS');
 
   const anchor = "try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}";
   const extension = String.raw`
@@ -77,43 +76,34 @@ var PARTY_RULES=[
   'Niemand darf „ich“ als erstes Wort eines Satzes benutzen.',
   'Wer eine aktive Regel erklären muss, nimmt selbst 1 Schluck.'
 ];
-var PARTY_EVENTS=[
-  'Alle nehmen 1 Schluck. Kurz, schmerzlos, weiter geht’s.',
-  'Wasser-Event: Alle trinken jetzt einmal Wasser.',
-  'Platztausch: Alle wechseln ihren Sitzplatz.',
-  'Hände hoch! Die letzte Person mit beiden Händen oben nimmt 1 Schluck.',
-  'Schere, Stein, Papier mit der Person links. Verlierer: 1 Schluck.',
-  'Reimrunde: Der Master nennt ein Wort. Erster Patzer nimmt 1 Schluck.',
-  'Freeze: Der Master darf einmal in dieser Runde „FREEZE“ rufen. Wer zuletzt stillhält, nimmt 1 Schluck.',
-  'Cheers: Alle stoßen an. Wer den Einsatz verpasst, nimmt 1 Schluck.',
-  'Stille Minute: Bis jemand antwortet, darf niemand den Namen eines Mitspielers sagen.',
-  'Buddy-Event: Such dir für diese Runde einen Partner. Wenn einer eine Strafe bekommt, nimmt der andere maximal 1 mit.'
-];
+var PARTY_RULE_MAX_ROUNDS=10;
+var PARTY_RULE_CHANCE=28;
 function partyHash(text){var h=2166136261>>>0,s=String(text||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function partyRuleStarts(code,round){
+  return (partyHash(String(code)+'|regel-start|'+round)%100)<PARTY_RULE_CHANCE;
+}
 function partyRuleIndex(code,start,used){var idx=partyHash(String(code)+'|regel|'+start)%PARTY_RULES.length;for(var n=0;n<PARTY_RULES.length;n++){var j=(idx+n)%PARTY_RULES.length;if(used.indexOf(j)<0)return j;}return idx;}
 function activePartyRules(s){
-  var r=Number(s&&s.round||0);if(r<1)return[];var starts=[],first=1;
-  for(var x=first;x<=r;x+=3)if(r-x<=5)starts.push(x);
+  var r=Number(s&&s.round||0);if(r<1)return[];
+  var first=Math.max(1,r-PARTY_RULE_MAX_ROUNDS+1),starts=[];
+  for(var x=first;x<=r;x++)if(partyRuleStarts(s.code,x))starts.push(x);
   var used=[],out=[];for(var i=0;i<starts.length;i++){var idx=partyRuleIndex(s.code,starts[i],used);used.push(idx);out.push(PARTY_RULES[idx]);}
   return out.slice(-2);
-}
-function currentPartyEvent(s){
-  var r=Number(s&&s.round||0);if(r<3||((r-3)%4)!==0||s.phase!=='question')return'';
-  return PARTY_EVENTS[partyHash(String(s.code)+'|event|'+r)%PARTY_EVENTS.length];
 }
 function ensurePartyRuleDock(){var d=document.getElementById('partyRuleDock');if(d)return d;d=document.createElement('div');d.id='partyRuleDock';d.className='party-rule-dock';d.setAttribute('aria-live','polite');document.body.appendChild(d);return d;}
 function updatePartyRuleDock(){
   var s=state,d=document.getElementById('partyRuleDock');
   if(!s||!joined||s.phase==='lobby'||s.phase==='end'||Number(s.round||0)<1){if(d)d.style.display='none';document.body.style.paddingTop='';return;}
-  d=ensurePartyRuleDock();var rules=activePartyRules(s),event=currentPartyEvent(s),out='<div class="party-rule-row"><span class="party-rule-title">📌 Regeln</span>';
+  var rules=activePartyRules(s);if(!rules.length){if(d)d.style.display='none';document.body.style.paddingTop='';return;}
+  d=ensurePartyRuleDock();var out='<div class="party-rule-row"><span class="party-rule-title">📌 Regeln</span>';
   for(var i=0;i<rules.length;i++)out+='<span class="party-rule-chip">'+esc(rules[i])+'</span>';
-  out+='</div>';if(event)out+='<div class="party-event">⚡ EVENT · '+esc(event)+'</div>';d.innerHTML=out;d.style.display='block';
+  out+='</div>';d.innerHTML=out;d.style.display='block';
   requestAnimationFrame(function(){document.body.style.paddingTop=Math.ceil(d.getBoundingClientRect().height)+'px';});
 }
 var partyV49Render=render;
 render=function(){partyV49Render();updatePartyRuleDock();};
 window.addEventListener('resize',function(){if(document.getElementById('partyRuleDock'))updatePartyRuleDock();});
 `;
-  html = replaceOnce(html, anchor, extension + '\n' + anchor, 'Regeln-und-Events-Runtime');
+  html = replaceOnce(html, anchor, extension + '\n' + anchor, 'Zufällige-Regeln-Runtime');
   return html;
 };
