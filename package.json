@@ -7,8 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server-v8.js",
-    "test": "node --test",
-    "check": "node -c server-v8.js && node -c server-v7.js && node -c server-v4.js && node -c hardening-v45.js && node -c frontend-v45.js && node -c pwa-v45.js && node -c more.js && node -c more-base.js && node -c party-extra.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
+    "test": "node --test --test-concurrency=1",
+    "check": "node -c server-v8.js && node -c server-v7.js && node -c server-v4.js && node -c hardening-v45.js && node -c frontend-v45.js && node -c pwa-v45.js && node -c more.js && node -c more-base.js && node -c party-extra.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test --test-concurrency=1"
   },
   "engines": {
     "node": ">=20"
