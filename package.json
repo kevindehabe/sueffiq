@@ -1,14 +1,14 @@
 {
   "name": "sueffiq",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
-  "description": "SüffIQ v2 – serverseitiges Multiplayer-Partyspiel ohne Anmeldung",
-  "main": "server.js",
+  "description": "SüffIQ v3 – serverseitiges Multiplayer-Partyspiel ohne Anmeldung",
+  "main": "server-v3.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
+    "start": "node server-v3.js",
     "test": "node --test",
-    "check": "node -c server.js && node -c logic.js && node -c questions.js && node --test"
+    "check": "node -c server-v3.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
   },
   "engines": {
     "node": ">=20"
