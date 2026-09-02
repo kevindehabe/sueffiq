@@ -83,13 +83,13 @@ test('every selectable category can be scheduled', async () => {
   await host.wait((m) => m.t === 'joined');
   let s = await host.state((x) => x.phase === 'lobby');
   const categories = Object.keys(s.cats);
-  assert.equal(categories.length, 12);
+  assert.equal(categories.length, 13);
+  assert.ok(categories.includes('minigame'));
 
   for (const cat of categories) {
     s = await setOnly(host, s, cat);
     host.send({ t: 'start' });
     if (cat === 'bild') {
-      // Wikipedia can be temporarily unavailable; both a real image round and the built-in graceful skip are valid.
       s = await host.state((x) => (x.phase === 'question' && x.current && x.current.type === 'bild') || (x.phase === 'results' && x.result && x.result.type === 'bild'), 22000);
     } else {
       s = await host.state((x) => x.phase === 'question' && x.current && x.current.type === cat, 8000);
