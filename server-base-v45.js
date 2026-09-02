@@ -542,6 +542,8 @@ function shutdown() {
 }
 process.on('SIGTERM', shutdown); process.on('SIGINT', shutdown);
 server.listen(PORT, '0.0.0.0', () => {
-  const ips = Object.values(os.networkInterfaces()).flat().filter((i) => i && i.family === 'IPv4' && !i.internal).map((i) => i.address);
+  let interfaces = {};
+  try { interfaces = os.networkInterfaces() || {}; } catch {}
+  const ips = Object.values(interfaces).flat().filter((i) => i && i.family === 'IPv4' && !i.internal).map((i) => i.address);
   console.log(`SüffIQ v${VERSION} läuft auf http://localhost:${PORT}`); ips.forEach((ip) => console.log(`Im WLAN: http://${ip}:${PORT}`));
 });

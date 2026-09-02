@@ -36,7 +36,13 @@ function songPlayerHtml(cur){
   return '<div class="song-stage">🎵 iTunes-Preview</div><div id="itunesSongStatus" class="itunes-song-status">Song wird vorgeladen … Der Master startet für alle.</div>'+guessHtml(cur,'Songtitel eingeben …');
 }
 `;
-  html = replaceFunctionRange(html, 'function songHostHtml(cur){', 'function questionBody(cur){', songUi, 'song UI');
+  // Minigame helpers are injected between songPlayerHtml() and questionBody().
+  // Ending the replacement at questionBody() used to delete those helpers and
+  // made the whole client crash on load (`resetMiniLocal is not defined`).
+  const songUiEnd = html.includes('function isMiniRound(cur){')
+    ? 'function isMiniRound(cur){'
+    : 'function questionBody(cur){';
+  html = replaceFunctionRange(html, 'function songHostHtml(cur){', songUiEnd, songUi, 'song UI');
 
   // Result page: show artwork rather than embedding a YouTube video.
   html = html.replace(
