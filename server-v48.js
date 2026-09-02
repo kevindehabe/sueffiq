@@ -15,8 +15,8 @@ function basePatchSource(needle, replacement, label) {
   return `extra.push(basePatch(${JSON.stringify(needle)}, ${JSON.stringify(replacement)}, ${JSON.stringify(label)}));`;
 }
 
-// Keep all v4.7 drawing/minigame fixes, but put the iTunes frontend at the end of that chain.
-src = replaceRequired(src, './frontend-draw-timing-v47', './frontend-itunes-v48', 'iTunes frontend');
+// Keep all v4.7 drawing/minigame fixes, but put the stable party frontend at the end of that chain.
+src = replaceRequired(src, './frontend-draw-timing-v47', './frontend-party-v49', 'v4.9 party frontend');
 
 const previewHelper = `const songPreviewCache = new Map();
 async function findSongPreview(song) {
