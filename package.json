@@ -1,14 +1,14 @@
 {
   "name": "sueffiq",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "private": true,
-  "description": "SüffIQ v4.2 – abwechslungsreiches Multiplayer-Partyspiel mit Rate-, Musik- und Schätzrunden",
-  "main": "server-v6.js",
+  "description": "SüffIQ v4.3 – Multiplayer-Partyspiel mit synchronen Songrunden, 10-Runden-Mix und schnellen Bildrunden",
+  "main": "server-v7.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node server-v6.js",
+    "start": "node server-v7.js",
     "test": "node --test",
-    "check": "node -c server-v6.js && node -c server-v4.js && node -c more.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
+    "check": "node -c server-v7.js && node -c server-v4.js && node -c more.js && node -c songs.js && node -c extras.js && node -c logic.js && node -c questions.js && node --test"
   },
   "engines": {
     "node": ">=20"
