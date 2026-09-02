@@ -209,7 +209,7 @@ function giveSips(room, sipMap) {
   const drinkers = [];
   for (const [id, raw] of Object.entries(sipMap || {})) {
     const player = room.players[id];
-    const n = clamp(Math.round(Number(raw) || 0), 0, 5);
+    const n = clamp(Math.round(Number(raw) || 0), 0, 3);
     if (!player || n <= 0) continue;
     player.drinks += n;
     drinkers.push({ id, name: player.name, n });
@@ -244,64 +244,64 @@ function finishRound(room, reason = 'complete') {
   if (cur.type === 'nie') {
     const yes = answeredIds.filter((id) => cur.answers[id] === 'ja');
     if (yes.length) {
-      const rarity = clamp(Math.ceil((1 - yes.length / Math.max(1, answeredIds.length)) * 3), 1, 3);
+      const rarity = clamp(Math.ceil((1 - yes.length / Math.max(1, answeredIds.length)) * 2), 1, 2);
       yes.forEach((id) => { sipMap[id] = rarity; });
       result.lines.push(`${yes.length} von ${answeredIds.length} haben's getan.`);
     } else result.lines.push('Niemand gibt es zu. Sehr verdächtig.');
   }
   if (cur.type === 'wahl') {
-    const out = voteSipMap(cur.answers, 5); Object.assign(sipMap, out.sips);
+    const out = voteSipMap(cur.answers, 3); Object.assign(sipMap, out.sips);
     result.votes = Object.entries(out.counts).filter(([id]) => room.players[id]).map(([id, n]) => ({ name: displayName(room, id), n })).sort((a, b) => b.n - a.n);
-    result.lines.push('Jede Stimme zählt als ein Schluck – maximal fünf.');
+    result.lines.push('Jede Stimme zählt als ein Schluck – maximal drei.');
   }
   if (cur.type === 'schaetz') {
-    const rows = estimateResults(cur.answers, cur.answer, 5); rows.forEach((row) => { sipMap[row.id] = row.sips; });
+    const rows = estimateResults(cur.answers, cur.answer, 3); rows.forEach((row) => { sipMap[row.id] = row.sips; });
     result.answer = cur.answer; result.unit = cur.unit;
     result.guesses = rows.map((row) => ({ id: row.id, name: displayName(room, row.id), guess: row.guess, diff: row.diff, sips: row.sips }));
     const best = rows.filter((r) => r.sips === 0); if (best.length) result.lines.push(`Am nächsten: ${best.map((r) => displayName(room, r.id)).join(', ')} – trocken.`);
   }
   if (cur.type === 'oder') {
-    const out = binaryMinority(cur.answers, 3); Object.assign(sipMap, out.sipsByPlayer);
+    const out = binaryMinority(cur.answers, 2); Object.assign(sipMap, out.sipsByPlayer);
     result.votes = cur.options.map((name, i) => ({ name, n: out.counts[String(i)] || 0 }));
     result.lines.push(Object.keys(out.sipsByPlayer).length ? 'Die Minderheit trinkt.' : 'Gleichstand: niemand trinkt.');
   }
   if (cur.type === 'trivia') {
     const correct = answeredIds.filter((id) => Number(cur.answers[id]) === cur.correct);
     const wrong = answeredIds.filter((id) => Number(cur.answers[id]) !== cur.correct);
-    const penalty = wrong.length ? clamp(Math.ceil((correct.length / Math.max(1, answeredIds.length)) * 3), 1, 3) : 0;
+    const penalty = wrong.length ? clamp(Math.ceil((correct.length / Math.max(1, answeredIds.length)) * 2), 1, 2) : 0;
     wrong.forEach((id) => { sipMap[id] = penalty; });
     result.answer = cur.options[cur.correct];
     result.votes = cur.options.map((name, i) => ({ name, n: answeredIds.filter((id) => Number(cur.answers[id]) === i).length }));
     result.lines.push(correct.length === answeredIds.length && answeredIds.length ? 'Alle richtig. Streberrunde.' : `${correct.length} von ${answeredIds.length} richtig.`);
   }
   if (cur.type === 'wahrheit' || cur.type === 'pflicht') {
-    const choice = cur.answers[cur.target]; const penalty = reason === 'timeout' ? 4 : 3;
+    const choice = cur.answers[cur.target]; const penalty = reason === 'timeout' ? 3 : 2;
     if (choice !== 'done') sipMap[cur.target] = penalty;
     result.target = displayName(room, cur.target); result.lines.push(choice === 'done' ? `${result.target} zieht durch.` : `${result.target} trinkt lieber.`);
   }
   if (cur.type === 'person' || cur.type === 'bild') {
     result.answer = cur.person.name; result.guesses = cur.guessFeed.slice();
     if (cur.type === 'bild') { result.imageUrl = cur.imageUrl; result.imageSource = cur.imageSource; }
-    for (const id of ids) { const solvedAt = cur.personCorrect[id]; sipMap[id] = solvedAt ? clamp(solvedAt - 1, 0, 4) : 5; }
-    result.lines.push(cur.type === 'bild' ? 'Je früher trotz Unschärfe erkannt, desto besser.' : 'Früh erkannt = trocken. Mit jedem weiteren Hinweis steigt die Strafe.');
+    for (const id of ids) { const solvedAt = cur.personCorrect[id]; sipMap[id] = solvedAt ? clamp(Math.ceil((solvedAt - 1) / 2), 0, 2) : 3; }
+    result.lines.push(cur.type === 'bild' ? 'Je früher trotz Unschärfe erkannt, desto besser.' : 'Früh erkannt = trocken. Spätere Hinweise kosten höchstens zwei Schlücke.');
   }
   if (cur.type === 'song') {
     result.answer = `${cur.song.title} – ${cur.song.artist}`; result.videoId = cur.song.videoId; result.guesses = cur.guessFeed.slice();
     const participants = songPlayers(room);
     if (reason !== 'broken') {
-      for (const id of participants) { const solvedAt = cur.songCorrect[id]; sipMap[id] = solvedAt ? clamp(solvedAt - 1, 0, 4) : 5; }
+      for (const id of participants) { const solvedAt = cur.songCorrect[id]; sipMap[id] = solvedAt ? clamp(Math.ceil((solvedAt - 1) / 2), 0, 2) : 3; }
       const solved = participants.filter((id) => cur.songCorrect[id]).length;
       result.lines.push(`${solved} von ${participants.length} haben den Song erkannt.`);
-      result.lines.push('Je schneller der Song erkannt wurde, desto weniger Schlücke.');
+      result.lines.push('Schnell erkannt = trocken oder ein Schluck; nicht erkannt = drei.');
     } else result.lines.push('Der Song konnte nicht abgespielt werden. Runde ohne Strafe übersprungen.');
   }
   if (cur.type === 'mehrheit') {
-    const out = majorityResults(cur.answers, 5); Object.assign(sipMap, out.sipsByPlayer);
+    const out = majorityResults(cur.answers, 3); Object.assign(sipMap, out.sipsByPlayer);
     result.votes = cur.options.map((name, i) => ({ name, n: out.counts[String(i)] || 0 }));
     result.lines.push(out.winners.length > 1 ? 'Mehrheits-Gleichstand – die Top-Antworten bleiben trocken.' : 'Je weiter hinter der Mehrheit, desto mehr Schlücke.');
   }
   if (cur.type === 'skala') {
-    const out = scaleResults(cur.answers, 5); out.rows.forEach((row) => { sipMap[row.id] = row.sips; });
+    const out = scaleResults(cur.answers, 3); out.rows.forEach((row) => { sipMap[row.id] = row.sips; });
     result.median = out.median; result.scale = out.rows.map((row) => ({ id: row.id, name: displayName(room, row.id), value: row.value, sips: row.sips }));
     result.lines.push(`Gruppenmitte: ${Number.isInteger(out.median) ? out.median : out.median.toFixed(1)}.`);
   }
@@ -464,7 +464,7 @@ const APP_HTML = buildHtml();
 const server = http.createServer((req, res) => {
   if (pwaHandler(req, res)) return;
   const url = String(req.url || '').split('?')[0];
-  if (url === '/health' || url === '/healthz') { res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify({ ok: true, rooms: rooms.size, version: VERSION, productionServer: true, mix: '10-round-variety', syncedSongs: true, continuousSongs: true, imageStepSeconds: 4 })); return; }
+  if (url === '/health' || url === '/healthz') { res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }); res.end(JSON.stringify({ ok: true, rooms: rooms.size, version: VERSION, productionServer: true, mix: '10-round-variety', syncedSongs: true, continuousSongs: true, imageStepSeconds: 4, maxSipsPerRound: 3 })); return; }
   if (url === '/robots.txt') { res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' }); res.end('User-agent: *\nDisallow:\n'); return; }
   if (url !== '/' && url !== '/index.html' && url !== '/v4.html') { res.writeHead(302, { location: '/' }); res.end(); return; }
   res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache, no-store, must-revalidate', 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin' }); res.end(APP_HTML);
