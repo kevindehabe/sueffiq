@@ -306,13 +306,21 @@ server.on('upgrade', (req, socket, head) => {
   wss.handleUpgrade(req, socket, head, (client) => {
     const upstream = new WebSocket(`ws://127.0.0.1:${INTERNAL_PORT}`);
     const queue = [];
+    let queuedBytes = 0;
 
     client.on('message', (data, isBinary) => {
-      if (upstream.readyState === WebSocket.OPEN) upstream.send(data, { binary: isBinary });
-      else queue.push([data, isBinary]);
+      if (data.length > 8192) return;
+      if (upstream.readyState === WebSocket.OPEN) {
+        upstream.send(data, { binary: isBinary });
+        return;
+      }
+      if (queue.length >= 64 || queuedBytes + data.length > 65536) return;
+      queue.push([data, isBinary]);
+      queuedBytes += data.length;
     });
     upstream.on('open', () => {
       for (const [data, isBinary] of queue.splice(0)) upstream.send(data, { binary: isBinary });
+      queuedBytes = 0;
     });
     upstream.on('message', (data, isBinary) => {
       if (client.readyState === WebSocket.OPEN) client.send(data, { binary: isBinary });
