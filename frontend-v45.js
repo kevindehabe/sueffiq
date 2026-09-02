@@ -24,6 +24,29 @@ module.exports = function hardenFrontend(html) {
     'id="guessInput" class="input" maxlength="64" autocomplete="off" autocapitalize="words" enterkeyhint="send"'
   );
 
+  // A fast tap can happen before the WebSocket is OPEN, especially after a Render cold start.
+  // Keep exactly one pending create/join command and send it immediately once the socket opens.
+  html = html.replace(
+    "var KEY='sueffiq-v4',ws=null,state=null,joined=null,feedback=null,retry=null,timerLoop=null;",
+    "var KEY='sueffiq-v4',ws=null,state=null,joined=null,feedback=null,retry=null,timerLoop=null,pendingEntry=null;"
+  );
+  html = html.replace(
+    "function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o));}",
+    "function send(o){if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true;}if(o&&(o.t==='create'||o.t==='join')){pendingEntry=o;connection.className='connection show';connection.textContent='Verbindung wird hergestellt …';}return false;}"
+  );
+  html = html.replace(
+    "  ws.onopen=function(){connection.className='connection';if(joined)send({t:'rejoin',code:joined.code,id:joined.id});};",
+    "  ws.onopen=function(){connection.className='connection';connection.textContent='Verbindung wird wiederhergestellt …';if(pendingEntry){var entry=pendingEntry;pendingEntry=null;send(entry);}else if(joined)send({t:'rejoin',code:joined.code,id:joined.id});};"
+  );
+  html = html.replace(
+    "    if(m.t==='joined'){saveJoin({code:m.code,id:m.id});return;}",
+    "    if(m.t==='joined'){pendingEntry=null;saveJoin({code:m.code,id:m.id});return;}"
+  );
+  html = html.replace(
+    "    if(m.t==='reset'){cleanupYouTube();clearJoin();state=null;feedback=null;render();return;}",
+    "    if(m.t==='reset'){pendingEntry=null;cleanupYouTube();clearJoin();state=null;feedback=null;render();return;}"
+  );
+
   // Let late reconnects learn the canonical song timestamp and join the already running song.
   html = html.replace(
     'var ytPlayer=null,ytApiReady=!!(window.YT&&window.YT.Player),ytPlayerReady=false,pendingSong=null,ytScriptLoading=false,pendingSync=null,syncTimer=null;',
