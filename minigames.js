@@ -15,7 +15,7 @@ const DRAW_PROMPTS = [
 ];
 
 // Reihenfolge ist gleichzeitig die Standardauswahl in der Lobby.
-const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'pong', 'blackjack'];
+const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'logo', 'pong', 'blackjack'];
 const COLOR_NAMES = ['Lila', 'Grün', 'Orange', 'Blau'];
 
 function randomSequence(length = 6) {
