@@ -30,11 +30,13 @@ module.exports = function tuneIndividualTapBattle(html) {
     'tap intro'
   );
 
+  // Keep the base round timer unchanged here. frontend-draw-timing-v472 combines
+  // the Tap-Battle and Alle-malen timer rules in one place, avoiding patch-order conflicts.
   html = mustReplace(
     html,
     "function timerHtml(){return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}",
-    "function timerHtml(){if(state&&state.current&&state.current.type==='minigame'&&state.current.miniType==='taps')return '';return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}",
-    'hide global tap timer'
+    "function timerHtml(){return '<div class=\"timer-label\"><span>Runde '+state.round+'</span><span id=\"secs\">–</span></div><div class=\"timer\"><div id=\"bar\"></div></div>';}",
+    'defer global tap timer'
   );
 
   html = mustReplace(
