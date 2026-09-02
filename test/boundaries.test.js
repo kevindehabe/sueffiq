@@ -70,6 +70,17 @@ async function join(code, name) {
   return { c, joined };
 }
 
+async function isolate(host, state, keep) {
+  let s = state;
+  for (const cat of [...s.selectedCats]) {
+    if (cat === keep) continue;
+    host.send({ t: 'toggleCat', cat });
+    s = await host.state((x) => Array.isArray(x.selectedCats) && !x.selectedCats.includes(cat));
+  }
+  assert.deepEqual(s.selectedCats, [keep]);
+  return s;
+}
+
 test.before(async () => {
   child = spawn(process.execPath, ['server-v3.js'], {
     cwd: path.join(__dirname, '..'),
@@ -117,8 +128,60 @@ test('explicit leave removes the player and invalidates rejoin', async () => {
   await retry.close(); await guest.c.close(); await host.close();
 });
 
-test('lobby accepts 30 connected players and rejects player 31', async () => {
-  const { c: host, joined: room } = await create('CapacityHost');
+test('truth target leaving mid-round is immediately retargeted', async () => {
+  const { c: host, joined: room, state } = await create('TruthHost');
+  const g1 = await join(room.code, 'TruthA');
+  const g2 = await join(room.code, 'TruthB');
+  await host.state((s) => s.players.filter((p) => p.connected).length === 3);
+  await isolate(host, state, 'wahrheit');
+
+  host.send({ t: 'start' });
+  const q = await host.state((s) => s.phase === 'question' && s.current?.type === 'wahrheit');
+  const clients = new Map([[room.id, host], [g1.joined.id, g1.c], [g2.joined.id, g2.c]]);
+  const leavingId = q.current.target;
+  const leaving = clients.get(leavingId);
+  assert.ok(leaving, 'truth target did not map to a connected client');
+
+  leaving.send({ t: 'leave' });
+  await leaving.wait((m) => m.t === 'reset');
+  clients.delete(leavingId);
+  const observer = [...clients.values()][0];
+  const after = await observer.state((s) => s.phase === 'question' && s.current?.type === 'wahrheit' && s.current.target !== leavingId);
+  assert.ok(clients.has(after.current.target), 'truth round was not retargeted to a remaining player');
+  assert.ok(!after.players.some((p) => p.id === leavingId), 'leaving target still exists in room state');
+
+  clients.get(after.current.target).send({ t: 'answer', v: 'done' });
+  await observer.state((s) => s.phase === 'results');
+
+  for (const c of clients.values()) await c.close();
+});
+
+test('host network loss during a question transfers control and allows rejoin', async () => {
+  const { c: host, joined: room, state } = await create('DropHost');
+  const guest = await join(room.code, 'DropGuest');
+  await host.state((s) => s.players.filter((p) => p.connected).length === 2);
+  await isolate(host, state, 'schaetz');
+
+  host.send({ t: 'start' });
+  await guest.c.state((s) => s.phase === 'question' && s.current?.type === 'schaetz');
+  await host.close();
+
+  const transferred = await guest.c.state((s) => s.phase === 'question' && s.hostId === guest.joined.id && s.players.some((p) => p.id === room.id && !p.connected));
+  assert.equal(transferred.hostId, guest.joined.id);
+  guest.c.send({ t: 'answer', v: '1' });
+  await guest.c.state((s) => s.phase === 'results');
+
+  const returning = await new Client().open();
+  returning.send({ t: 'rejoin', code: room.code, id: room.id });
+  await returning.wait((m) => m.t === 'joined' && m.id === room.id);
+  const rejoined = await returning.state((s) => s.phase === 'results' && s.players.some((p) => p.id === room.id && p.connected));
+  assert.equal(rejoined.hostId, guest.joined.id, 'rejoining old host should not steal host control back');
+
+  await returning.close(); await guest.c.close();
+});
+
+test('30 connected players can complete a full round and player 31 is rejected', async () => {
+  const { c: host, joined: room, state } = await create('CapacityHost');
   const guests = [];
   for (let i = 1; i < 30; i += 1) guests.push(await join(room.code, `P${i}`));
   const full = await host.state((s) => s.players.filter((p) => p.connected).length === 30, 8000);
@@ -128,6 +191,16 @@ test('lobby accepts 30 connected players and rejects player 31', async () => {
   overflow.send({ t: 'join', code: room.code, name: 'P30' });
   const err = await overflow.wait((m) => m.t === 'error');
   assert.match(err.m, /Lobby ist voll|max\. 30/);
+
+  await isolate(host, state, 'oder');
+  host.send({ t: 'start' });
+  await host.state((s) => s.phase === 'question' && s.current?.type === 'oder');
+  for (const g of guests) await g.c.state((s) => s.phase === 'question' && s.current?.type === 'oder');
+
+  host.send({ t: 'answer', v: 0 });
+  for (const g of guests) g.c.send({ t: 'answer', v: 0 });
+  const result = await host.state((s) => s.phase === 'results', 10000);
+  assert.equal(result.players.filter((p) => p.connected).length, 30);
 
   await overflow.close();
   for (const g of guests.reverse()) await g.c.close();
