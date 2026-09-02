@@ -37,26 +37,14 @@ function applyStableDrawChain(html) {
   return html;
 }
 
-function applyITunesWithoutReplayingBase(html) {
-  const timerPath = require.resolve('./frontend-draw-timing-v472');
-  const itunesPath = require.resolve('./frontend-itunes-v48');
-  require(timerPath);
-  const timerEntry = require.cache[timerPath];
-  const previousTimerExport = timerEntry.exports;
-  try {
-    timerEntry.exports = (value) => value;
-    delete require.cache[itunesPath];
-    const tuneITunes = require(itunesPath);
-    return tuneITunes(html);
-  } finally {
-    timerEntry.exports = previousTimerExport;
-    delete require.cache[itunesPath];
-  }
+function applyITunes(html) {
+  const tuneITunes = require('./frontend-itunes-v481');
+  return tuneITunes(html);
 }
 
 module.exports = function tunePartyV49(html) {
   html = applyStableDrawChain(html);
-  html = applyITunesWithoutReplayingBase(html);
+  html = applyITunes(html);
 
   html = replaceOnce(html, '</style>', `
 /* Portrait-safe image guessing: never crop heads/faces out of the source image. */
