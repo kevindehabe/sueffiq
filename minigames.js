@@ -14,7 +14,8 @@ const DRAW_PROMPTS = [
   'Mario-Kart-Abend','Zu spät kommen','Katerfrühstück','Urlaubsflirt','Letzter Bus','Handy verloren','Tanzen auf dem Tisch','Falscher Chat','Peinliches Selfie','Nachts Döner holen'
 ];
 
-const MINI_TYPES = ['zeichnen', 'reaktion', 'taps', 'farbfolge'];
+// Reihenfolge ist gleichzeitig die Standardauswahl in der Lobby.
+const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'pong', 'blackjack'];
 const COLOR_NAMES = ['Lila', 'Grün', 'Orange', 'Blau'];
 
 function randomSequence(length = 6) {
@@ -80,4 +81,5 @@ module.exports = {
   reactionResults,
   tapResults,
   memoryResults,
+  gentleRankSips,
 };
