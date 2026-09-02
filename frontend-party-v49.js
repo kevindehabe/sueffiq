@@ -57,7 +57,8 @@ module.exports = function tunePartyV49(html) {
 .party-rule-row{display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.party-rule-row::-webkit-scrollbar{display:none}
 .party-rule-title{flex:0 0 auto;font-size:10px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .party-rule-chip{flex:0 0 auto;max-width:78vw;padding:7px 9px;border-radius:999px;background:#20172a;border:1px solid rgba(184,255,74,.18);font-size:10px;font-weight:850;white-space:nowrap;color:var(--text)}
-@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}}
+.party-rule-ended{position:fixed;left:10px;right:10px;z-index:10070;padding:11px 12px;border-radius:14px;background:rgba(63,18,24,.97);border:1px solid rgba(255,95,108,.48);box-shadow:0 10px 30px rgba(0,0,0,.38);font-size:11px;font-weight:850;line-height:1.35;color:#ffd9dc;transform:translateY(-8px);opacity:0;transition:opacity .18s ease,transform .18s ease;pointer-events:none}.party-rule-ended.show{opacity:1;transform:translateY(0)}.party-rule-ended b{display:block;margin-bottom:3px;color:#ff7884;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}.party-rule-ended{font-size:10px}}
 </style>`, 'Regeln/Bild-CSS');
 
   const anchor = "try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}";
@@ -78,6 +79,7 @@ var PARTY_RULES=[
 ];
 var PARTY_RULE_MAX_ROUNDS=10;
 var PARTY_RULE_CHANCE=28;
+var partyRuleLastRound=0,partyRuleLastRules=[],partyRuleEndTimer=null;
 function partyHash(text){var h=2166136261>>>0,s=String(text||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function partyRuleStarts(code,round){
   return (partyHash(String(code)+'|regel-start|'+round)%100)<PARTY_RULE_CHANCE;
@@ -91,14 +93,24 @@ function activePartyRules(s){
   return out.slice(-2);
 }
 function ensurePartyRuleDock(){var d=document.getElementById('partyRuleDock');if(d)return d;d=document.createElement('div');d.id='partyRuleDock';d.className='party-rule-dock';d.setAttribute('aria-live','polite');document.body.appendChild(d);return d;}
+function showPartyRuleEnded(rules){
+  if(!rules||!rules.length)return;
+  var n=document.getElementById('partyRuleEnded');if(!n){n=document.createElement('div');n.id='partyRuleEnded';n.className='party-rule-ended';n.setAttribute('role','status');document.body.appendChild(n);}
+  var text=rules.length===1?rules[0]:rules.join(' · ');n.innerHTML='<b>🚫 Regel aufgehoben</b>'+esc(text)+' – zählt ab jetzt nicht mehr.';
+  var dock=document.getElementById('partyRuleDock');if(dock&&dock.style.display!=='none')n.style.top=(Math.ceil(dock.getBoundingClientRect().height)+8)+'px';else n.style.top='calc(env(safe-area-inset-top,0px) + 10px)';
+  n.classList.add('show');clearTimeout(partyRuleEndTimer);partyRuleEndTimer=setTimeout(function(){n.classList.remove('show');},5200);
+}
 function updatePartyRuleDock(){
   var s=state,d=document.getElementById('partyRuleDock');
-  if(!s||!joined||s.phase==='lobby'||s.phase==='end'||Number(s.round||0)<1){if(d)d.style.display='none';document.body.style.paddingTop='';return;}
-  var rules=activePartyRules(s);if(!rules.length){if(d)d.style.display='none';document.body.style.paddingTop='';return;}
+  if(!s||!joined||s.phase==='lobby'||s.phase==='end'||Number(s.round||0)<1){if(d)d.style.display='none';document.body.style.paddingTop='';partyRuleLastRound=Number(s&&s.round||0);partyRuleLastRules=[];return;}
+  var round=Number(s.round||0),rules=activePartyRules(s),ended=[];
+  if(partyRuleLastRound>0&&round!==partyRuleLastRound){for(var e=0;e<partyRuleLastRules.length;e++)if(rules.indexOf(partyRuleLastRules[e])<0)ended.push(partyRuleLastRules[e]);}
+  partyRuleLastRound=round;partyRuleLastRules=rules.slice();
+  if(!rules.length){if(d)d.style.display='none';document.body.style.paddingTop='';if(ended.length)showPartyRuleEnded(ended);return;}
   d=ensurePartyRuleDock();var out='<div class="party-rule-row"><span class="party-rule-title">📌 Regeln</span>';
   for(var i=0;i<rules.length;i++)out+='<span class="party-rule-chip">'+esc(rules[i])+'</span>';
   out+='</div>';d.innerHTML=out;d.style.display='block';
-  requestAnimationFrame(function(){document.body.style.paddingTop=Math.ceil(d.getBoundingClientRect().height)+'px';});
+  requestAnimationFrame(function(){document.body.style.paddingTop=Math.ceil(d.getBoundingClientRect().height)+'px';if(ended.length)showPartyRuleEnded(ended);});
 }
 var partyV49Render=render;
 render=function(){partyV49Render();updatePartyRuleDock();};
