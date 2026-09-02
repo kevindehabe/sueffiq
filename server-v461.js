@@ -19,8 +19,8 @@ src = patch(src,
   'frontend module');
 
 src = patch(src,
-  "      else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else answered = false;",
-  "      else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else if (cur.miniType === 'taps') answered = !!cur.tapDone?.[id];\n      else answered = false;",
+  String.raw`else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else answered = false;`,
+  String.raw`else if (cur.miniType === 'reaktion' || cur.miniType === 'farbfolge') answered = cur.answers?.[id] !== undefined;\n      else if (cur.miniType === 'taps') answered = !!cur.tapDone?.[id];\n      else answered = false;`,
   'tap answered status');
 
 src = patch(src,
