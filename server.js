@@ -1,4 +1,4 @@
 'use strict';
-// One-process production entrypoint. v4.7 keeps the browser-party core and
-// primes song audio once in the lobby for more reliable iPhone playback.
-require('./server-v471');
+// One-process production entrypoint. Song rounds now use synchronized iTunes
+// previews through a persistent HTML5 audio element instead of YouTube.
+require('./server-v48');
