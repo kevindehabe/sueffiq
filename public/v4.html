@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0914">
+<title>SüffIQ</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0914;--panel:#171022;--line:rgba(255,255,255,.10);--text:#f8f7fb;--muted:#aaa0b7;--accent:#b8ff4a;--purple:#8f5cff;--danger:#ff5f74;--ok:#57e39a;--warn:#ffcc58}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}body{min-height:100dvh;background:radial-gradient(circle at 10% 0%,rgba(143,92,255,.22),transparent 34rem),radial-gradient(circle at 95% 20%,rgba(184,255,74,.10),transparent 28rem),var(--bg)}button,input{font:inherit}.app{width:min(680px,100%);min-height:100dvh;margin:auto;padding:max(18px,env(safe-area-inset-top)) 15px max(28px,env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.brand{font-size:24px;font-weight:950;letter-spacing:-.8px;display:flex;align-items:center;gap:9px}.logo{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,var(--purple),#5d31bf)}.brand b{color:var(--accent)}.chips{display:flex;gap:6px}.chip{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:999px;padding:8px 10px;color:var(--muted);font-size:12px;font-weight:850}.chip strong{color:var(--text)}
+.hero{text-align:center;padding:42px 4px 24px}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:900}h1{font-size:clamp(48px,14vw,76px);line-height:.92;letter-spacing:-4px;margin:9px 0 12px}h1 span{color:var(--accent)}.subtitle{color:var(--muted);line-height:1.5;max-width:520px;margin:auto}.card{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:23px;padding:17px;box-shadow:0 18px 60px rgba(0,0,0,.32)}.stack{display:grid;gap:11px}
+.input{width:100%;border:1px solid var(--line);background:#100b18;color:var(--text);border-radius:15px;padding:15px 16px;outline:none}.input:focus{border-color:rgba(184,255,74,.55);box-shadow:0 0 0 3px rgba(184,255,74,.08)}.input.code{text-align:center;text-transform:uppercase;letter-spacing:4px;font-weight:900}.btn{width:100%;border:0;border-radius:15px;padding:15px 16px;font-weight:950;cursor:pointer}.primary{background:var(--accent);color:#11170a}.secondary{background:#2b1c40;color:var(--text);border:1px solid rgba(143,92,255,.3)}.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.danger{background:rgba(255,95,116,.12);color:#ff9aaa;border:1px solid rgba(255,95,116,.22)}
+.divider{display:flex;align-items:center;gap:10px;color:#746b7e;font-size:12px}.divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}.cloud{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:19px 0}.pill{padding:7px 9px;border-radius:999px;border:1px solid var(--line);color:#bcb3c6;background:rgba(255,255,255,.03);font-size:11px;font-weight:800}.hot{color:#ffadb9!important;border-color:rgba(255,95,116,.2)!important}.music{color:#bca5ff!important;border-color:rgba(143,92,255,.28)!important}
+.note{margin-top:13px;border:1px solid var(--line);border-radius:14px;padding:11px 12px;color:var(--muted);font-size:12px;line-height:1.45}.note b{color:var(--text)}.footer{text-align:center;color:#716779;font-size:11px;margin-top:18px}.center{text-align:center}.big-code{font-size:42px;letter-spacing:8px;font-weight:1000}.section{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1.2px;margin:20px 2px 9px}
+.players{display:grid;gap:8px}.player{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:14px}.pl{display:flex;align-items:center;gap:10px;min-width:0}.avatar{width:34px;height:34px;border-radius:11px;background:#281a39;color:var(--accent);display:grid;place-items:center;font-weight:950}.pname{font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{color:var(--muted);font-size:11px}.mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:7px 9px;font-size:11px;font-weight:800}
+.game-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px}.category{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:1.4px;font-weight:1000}.question{font-size:clamp(24px,7vw,35px);line-height:1.12;letter-spacing:-1px;font-weight:950;margin:12px 0 18px}.timer-label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:800;margin-bottom:5px}.timer{height:6px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin-bottom:14px}.timer div{height:100%;background:linear-gradient(90deg,var(--purple),var(--accent));transform-origin:left}
+.answers{display:grid;gap:9px}.answer{width:100%;text-align:left;border:1px solid var(--line);background:#171020;color:var(--text);border-radius:15px;padding:14px 15px;font-weight:850}.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.scale button{aspect-ratio:1;border-radius:13px;border:1px solid var(--line);background:#171020;color:var(--text);font-weight:950;font-size:17px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.waiting{text-align:center;color:var(--muted);padding:15px 5px;line-height:1.45}.target{display:inline-flex;padding:8px 10px;border-radius:11px;color:var(--accent);background:rgba(184,255,74,.07);border:1px solid rgba(184,255,74,.2);font-size:13px;font-weight:850;margin-bottom:12px}
+.answered{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}.answered span{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 8px}.answered span.ok{color:#9cf2c4;background:rgba(87,227,154,.06);border-color:rgba(87,227,154,.2)}.hints{display:grid;gap:8px;margin-bottom:14px}.hint{border-left:3px solid var(--purple);background:#15101e;padding:11px 12px;border-radius:5px 13px 13px 5px;line-height:1.4}.hint small{display:block;color:var(--muted);text-transform:uppercase;font-size:10px;font-weight:900;letter-spacing:1px;margin-bottom:3px}
+.guess{display:flex;gap:8px}.guess .input{flex:1}.guess .btn{width:auto;min-width:90px}.feedback{display:none;margin-top:9px;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:850}.feedback.show{display:block}.feedback.correct{color:#8bf1ba;background:rgba(87,227,154,.09);border:1px solid rgba(87,227,154,.18)}.feedback.near{color:#ffd878;background:rgba(255,204,88,.09);border:1px solid rgba(255,204,88,.18)}.feedback.wrong{color:#c5b9ce;background:rgba(255,255,255,.04);border:1px solid var(--line)}.feed{margin-top:13px}.feed div{padding:7px 1px;border-bottom:1px solid rgba(255,255,255,.055);color:var(--muted);font-size:12px}.feed b{color:var(--text)}
+.photo-wrap{position:relative;overflow:hidden;border-radius:19px;background:#09060e;aspect-ratio:4/3;margin-bottom:14px;border:1px solid var(--line)}.photo{width:100%;height:100%;object-fit:cover;transform:scale(1.07);transition:filter 1s ease,transform 1s ease}.blur0{filter:blur(34px)}.blur1{filter:blur(24px)}.blur2{filter:blur(15px)}.blur3{filter:blur(7px)}.blur4{filter:blur(0);transform:scale(1)}.photo-step{position:absolute;right:10px;bottom:10px;padding:7px 9px;border-radius:999px;background:rgba(0,0,0,.68);font-size:11px;font-weight:900}
+.dj{border:1px solid rgba(143,92,255,.25);background:rgba(143,92,255,.06);border-radius:16px;padding:13px;margin-bottom:12px}.dj-title{font-weight:950;margin-bottom:5px}.yt-wrap{margin-top:12px}.yt-wrap iframe{display:block;width:100%!important;height:270px!important;border:0;border-radius:14px}.snippet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.snippet{border:1px solid var(--line);background:#171020;color:var(--text);border-radius:12px;padding:11px 6px;font-weight:900}.snippet.active{border-color:rgba(184,255,74,.55);color:var(--accent);background:rgba(184,255,74,.07)}.song-stage{display:inline-flex;align-items:center;gap:6px;color:#cab8ff;background:rgba(143,92,255,.08);border:1px solid rgba(143,92,255,.2);border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;margin-bottom:12px}
+.result{text-align:center;padding:7px 2px 12px}.result-emoji{font-size:44px}.result h2{margin:5px 0;font-size:27px}.result-line{color:var(--muted);line-height:1.45}.correct-answer{color:var(--accent);font-weight:950;font-size:20px;margin-top:7px}.drinkers{display:grid;gap:8px;margin-top:12px}.drinker{display:flex;justify-content:space-between;gap:10px;padding:12px 13px;border-radius:14px;background:rgba(255,95,116,.075);border:1px solid rgba(255,95,116,.14)}.drinker strong:last-child{color:#ff9baa}.dry{text-align:center;color:#91e9b8;border:1px solid rgba(87,227,154,.14);background:rgba(87,227,154,.055);border-radius:14px;padding:13px}.detail{margin-top:12px}.detail-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 1px;border-bottom:1px solid rgba(255,255,255,.06)}.detail-row span:last-child{color:var(--muted);font-weight:850}.scoreboard{display:grid;gap:8px}.score-row{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}.rank{color:var(--muted);font-weight:900;text-align:center}.score{font-weight:950;color:var(--accent)}
+.toast{position:fixed;z-index:20;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;width:min(92vw,500px);padding:12px 14px;border-radius:13px;background:#241831;border:1px solid var(--line);box-shadow:0 18px 60px rgba(0,0,0,.4);transition:.2s;font-weight:800;font-size:13px}.toast.show{opacity:1;transform:translate(-50%,0)}.connection{display:none;margin-bottom:10px;padding:9px 10px;text-align:center;border-radius:12px;background:rgba(255,204,88,.11);border:1px solid rgba(255,204,88,.2);color:#ffd878;font-size:12px;font-weight:850}.connection.show{display:block}
+@media(max-width:430px){.grid2{grid-template-columns:1fr}.big-code{font-size:36px}.photo-wrap{aspect-ratio:1}.yt-wrap iframe{height:200px!important}.snippet-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main class="app"><div id="connection" class="connection">Verbindung wird wiederhergestellt …</div><div id="root"><div class="hero"><div class="eyebrow">SüffIQ lädt …</div><h1>Süff<span>IQ</span></h1></div></div></main>
+<div id="toast" class="toast"></div>
+<script>
+(function(){
+'use strict';
+var root=document.getElementById('root'),connection=document.getElementById('connection'),toastEl=document.getElementById('toast');
+var KEY='sueffiq-v4',ws=null,state=null,joined=null,feedback=null,retry=null,timerLoop=null;
+var ytPlayer=null,ytApiReady=!!(window.YT&&window.YT.Player),ytPlayerReady=false,pendingSong=null,ytScriptLoading=false;
+
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];});}
+function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o));}
+function toast(m){toastEl.textContent=m;toastEl.className='toast show';setTimeout(function(){toastEl.className='toast';},2400);}
+function saveJoin(v){joined=v;try{localStorage.setItem(KEY,JSON.stringify(v));}catch(e){}}
+function clearJoin(){joined=null;try{localStorage.removeItem(KEY);}catch(e){}}
+function isGuessType(t){return t==='person'||t==='bild'||t==='song';}
+function canPatch(prev,next){
+  return !!(prev&&next&&prev.phase==='question'&&next.phase==='question'&&prev.current&&next.current&&prev.round===next.round&&prev.current.type===next.current.type&&isGuessType(next.current.type)&&(!(next.current.yourStatus&&next.current.yourStatus.status==='correct'))&&(next.current.type==='song'?(next.current.isHost?document.getElementById('songHostPanel'):document.getElementById('guessForm')):document.getElementById('guessForm')));
+}
+function hintsInner(cur){var out='';for(var i=0;i<cur.hints.length;i++)out+='<div class="hint"><small>Hinweis '+(i+1)+' von '+cur.hintCount+'</small>'+esc(cur.hints[i])+'</div>';return out;}
+function feedInner(cur){var out='';if(!cur.guessFeed)return out;for(var i=cur.guessFeed.length-1;i>=0&&i>=cur.guessFeed.length-8;i--)out+='<div><b>'+esc(cur.guessFeed[i].name)+'</b>: '+esc(cur.guessFeed[i].guess)+'</div>';return out;}
+function answeredInner(){var out='',i,p;for(i=0;i<state.players.length;i++){p=state.players[i];if(!p.connected)continue;out+='<span class="'+(p.answered?'ok':'')+'">'+(p.answered?'✓ ':'')+esc(p.name)+'</span>';}return out;}
+function updateSongStageUI(cur){
+  var e=document.getElementById('songStageText');
+  if(e)e.textContent=(cur.songSnippets&&cur.songSnippets[cur.songStage]||1)+' Sekunden';
+  var buttons=document.querySelectorAll('.snippet');
+  for(var i=0;i<buttons.length;i++)buttons[i].className='snippet'+(Number(buttons[i].getAttribute('data-stage'))===Number(cur.songStage)?' active':'');
+}
+function patchRound(cur){
+  var e;
+  if(cur.type==='person'){e=document.getElementById('hints');if(e)e.innerHTML=hintsInner(cur);}
+  if(cur.type==='bild'){e=document.getElementById('photo');if(e)e.className='photo blur'+Number(cur.blurStep||0);e=document.getElementById('photoStep');if(e)e.textContent='Schärfe '+(Number(cur.blurStep||0)+1)+'/5';}
+  if(cur.type==='song')updateSongStageUI(cur);
+  e=document.getElementById('guessFeed');if(e)e.innerHTML=feedInner(cur);
+  e=document.getElementById('answeredRow');if(e)e.innerHTML=answeredInner();
+  tick();
+}
+function updateFeedbackBox(){
+  var e=document.getElementById('guessFeedback');if(!e)return false;
+  if(!feedback){e.className='feedback';e.textContent='';}
+  else{e.className='feedback show '+feedback.status;e.textContent=feedback.m||'';}
+  return true;
+}
+function cleanupYouTube(){
+  if(ytPlayer&&typeof ytPlayer.destroy==='function'){try{ytPlayer.destroy();}catch(e){}}
+  ytPlayer=null;ytPlayerReady=false;pendingSong=null;
+}
+function connect(){
+  clearTimeout(retry);
+  var proto=location.protocol==='https:'?'wss:':'ws:';
+  ws=new WebSocket(proto+'//'+location.host);
+  ws.onopen=function(){connection.className='connection';if(joined)send({t:'rejoin',code:joined.code,id:joined.id});};
+  ws.onclose=function(){connection.className='connection show';retry=setTimeout(connect,1200);};
+  ws.onerror=function(){};
+  ws.onmessage=function(ev){
+    var m,prev;try{m=JSON.parse(ev.data);}catch(e){return;}
+    if(m.t==='joined'){saveJoin({code:m.code,id:m.id});return;}
+    if(m.t==='reset'){cleanupYouTube();clearJoin();state=null;feedback=null;render();return;}
+    if(m.t==='error'){toast(m.m||'Fehler');return;}
+    if(m.t==='guessFeedback'||m.t==='personFeedback'){
+      feedback={status:m.status,m:m.m};
+      if(m.status!=='correct'&&updateFeedbackBox())return;
+      render();return;
+    }
+    if(m.t==='state'){
+      prev=state;
+      if(prev&&m.s&&prev.round!==m.s.round)feedback=null;
+      state=m.s;
+      if(canPatch(prev,state)){patchRound(state.current);return;}
+      render();
+    }
+  };
+}
+function topHtml(){
+  if(!state)return '';
+  var me=null,i;for(i=0;i<state.players.length;i++)if(state.players[i].id===state.you){me=state.players[i];break;}
+  return '<div class="top"><div class="brand"><span class="logo">🍻</span><span>Süff<b>IQ</b></span></div><div class="chips"><span class="chip"><strong>'+esc(state.code)+'</strong></span>'+(me?'<span class="chip">💧 <strong>'+me.drinks+'</strong></span>':'')+'</div></div>';
+}
+function landingHtml(){
+  return '<div class="hero"><div class="eyebrow">Das Partyquiz ohne Login</div><h1>Süff<span>IQ</span></h1><p class="subtitle">Schätzen, abstimmen, Personen und Songs erraten – direkt mit mehreren Handys.</p></div>'+ '<div class="card stack"><input id="name" class="input" maxlength="18" placeholder="Dein Name"><button id="create" class="btn primary">Spiel erstellen</button><div class="divider">oder beitreten</div><input id="code" class="input code" maxlength="5" placeholder="ABCDE"><button id="join" class="btn secondary">Spiel beitreten</button></div>'+ '<div class="cloud"><span class="pill">Schätzfragen</span><span class="pill">4-Antwort-Quiz</span><span class="pill">Person erraten</span><span class="pill">Bild wird schärfer</span><span class="pill music">🎵 Song erraten</span><span class="pill hot">18+ Mix</span><span class="pill">Mehrheit</span></div>'+ '<div class="note"><b>18+.</b> Die Schlücke sind Spielpunkte. Alkohol ist nicht nötig.</div><div class="footer">SüffIQ v4.0</div>';
+}
+function bindLanding(){
+  document.getElementById('create').onclick=function(){var n=document.getElementById('name').value.trim();if(!n)return toast('Name fehlt.');send({t:'create',name:n});};
+  document.getElementById('join').onclick=function(){var n=document.getElementById('name').value.trim(),code=document.getElementById('code').value.trim().toUpperCase();if(!n||code.length!==5)return toast('Name und 5-stelligen Code eingeben.');send({t:'join',name:n,code:code});};
+}
+function playersHtml(){
+  var out='<div class="players">',i,p,host;
+  for(i=0;i<state.players.length;i++){
+    p=state.players[i];if(state.phase==='lobby'&&!p.connected)continue;host=p.id===state.hostId;
+    out+='<div class="player"><div class="pl"><div class="avatar">'+esc(p.name.charAt(0).toUpperCase())+'</div><div><div class="pname">'+esc(p.name)+(host?' 👑':'')+'</div><div class="meta">'+(p.connected?'online':'offline')+' · '+p.drinks+' Schlücke</div></div></div>';
+    if(state.you===state.hostId&&!host&&p.connected&&state.phase==='lobby')out+='<button class="mini hostbtn" data-id="'+esc(p.id)+'">Host</button>';
+    out+='</div>';
+  }
+  return out+'</div>';
+}
+function lobbyHtml(){
+  var host=state.you===state.hostId;
+  var controls=host?'<div class="grid2"><button id="start" class="btn primary">Spiel starten</button><button id="leaveLobby" class="btn ghost">Lobby verlassen</button></div>':'<div class="waiting">Der Host startet das Spiel.</div><button id="leaveLobby" class="btn ghost">Lobby verlassen</button>';
+  return topHtml()+'<div class="card center"><div class="meta">Spielcode</div><div class="big-code">'+esc(state.code)+'</div><div class="note">Mitspieler öffnen dieselbe Seite und geben diesen Code ein.</div></div><div class="section">Spieler</div>'+playersHtml()+'<div style="height:12px"></div>'+controls+'<div class="footer">Automatischer Mix · keine Einstellungen · 18+</div>';
+}
+function targetName(id){for(var i=0;i<state.players.length;i++)if(state.players[i].id===id)return state.players[i].name;return 'Spieler';}
+function answeredHtml(){return '<div id="answeredRow" class="answered">'+answeredInner()+'</div>';}
+function timerHtml(){return '<div class="timer-label"><span>Runde '+state.round+'</span><span id="secs">–</span></div><div class="timer"><div id="bar"></div></div>';}
+function feedbackHtml(){return feedback?'<div id="guessFeedback" class="feedback show '+esc(feedback.status)+'">'+esc(feedback.m)+'</div>':'<div id="guessFeedback" class="feedback"></div>';}
+function guessHtml(cur,placeholder){
+  var solved=cur.yourStatus&&cur.yourStatus.status==='correct';
+  if(solved)return '<div class="feedback show correct">✓ Richtig erkannt. Dein Tipp bleibt geheim.</div><div id="guessFeed" class="feed">'+feedInner(cur)+'</div>';
+  return '<form id="guessForm" class="guess"><input id="guessInput" class="input" maxlength="64" autocomplete="off" placeholder="'+esc(placeholder||'Name eingeben …')+'"><button class="btn primary">Tippen</button></form>'+feedbackHtml()+'<div id="guessFeed" class="feed">'+feedInner(cur)+'</div>';
+}
+function songHostHtml(cur){
+  var snippets=cur.songSnippets||[1,3,7,12],buttons='';
+  for(var i=0;i<snippets.length;i++)buttons+='<button class="snippet'+(i===cur.songStage?' active':'')+'" data-stage="'+i+'">▶ '+snippets[i]+' s</button>';
+  return '<div id="songHostPanel"><div class="dj"><div class="dj-title">🎧 Du bist in dieser Runde der DJ</div><div class="meta">Der Song läuft nur auf deinem Gerät. Du spielst deshalb bei dieser Runde nicht mit. Am besten Lautsprecher/Bluetooth nutzen.</div></div>'+ '<div class="song-stage">Aktuelle Stufe: <span id="songStageText">'+snippets[cur.songStage]+' Sekunden</span></div>'+ '<button id="loadYT" class="btn secondary">YouTube-Player laden</button><div class="note">Beim Laden wird ein sichtbarer YouTube-Player eingebettet. Titel und YouTube-Oberfläche bleiben auf dem Host-Gerät sichtbar.</div>'+ '<div id="ytPlayerWrap" class="yt-wrap"><div id="ytPlayer"></div></div><div class="snippet-grid">'+buttons+'</div>'+ '<button id="songBroken" class="btn ghost" style="margin-top:10px">Video funktioniert nicht · Runde überspringen</button></div>';
+}
+function songPlayerHtml(cur){
+  var snippets=cur.songSnippets||[1,3,7,12];
+  return '<div class="song-stage">🎵 Ausschnitt: <span id="songStageText">'+snippets[cur.songStage]+' Sekunden</span></div><div class="note" style="margin-bottom:12px">Hör auf den Lautsprecher des Hosts und tippe den <b>Songtitel</b>. Nur der Interpret zählt als „nah dran“.</div>'+guessHtml(cur,'Songtitel eingeben …');
+}
+function questionBody(cur){
+  var out='',i,p;
+  if(cur.type==='nie')return '<div class="answers"><button class="answer" data-v="ja">Hab ich 😈</button><button class="answer" data-v="nein">Noch nie 😇</button></div>';
+  if(cur.type==='wahl'){out='<div class="answers">';for(i=0;i<state.players.length;i++){p=state.players[i];if(p.connected)out+='<button class="answer" data-v="'+esc(p.id)+'">'+esc(p.name)+'</button>';}return out+'</div>';}
+  if(cur.type==='schaetz')return '<form id="estimate" class="guess"><input id="estimateInput" inputmode="decimal" class="input" placeholder="Deine Schätzung"><button class="btn primary">Abgeben</button></form>';
+  if(cur.type==='oder'||cur.type==='trivia'||cur.type==='mehrheit'){out='<div class="answers">';for(i=0;i<cur.options.length;i++)out+='<button class="answer" data-v="'+i+'">'+String.fromCharCode(65+i)+' · '+esc(cur.options[i])+'</button>';return out+'</div>';}
+  if(cur.type==='skala'){out='<div class="scale">';for(i=1;i<=10;i++)out+='<button data-v="'+i+'">'+i+'</button>';return out+'</div>';}
+  if(cur.type==='wahrheit'||cur.type==='pflicht'){if(cur.isTarget)return '<div class="target">🎯 Du bist dran</div><div class="grid2"><button class="btn primary" data-v="done">Gemacht</button><button class="btn danger" data-v="drink">Lieber trinken</button></div>';return '<div class="target">🎯 '+esc(targetName(cur.target))+' ist dran</div><div class="waiting">Zurücklehnen und urteilen.</div>';}
+  if(cur.type==='person')return '<div id="hints" class="hints">'+hintsInner(cur)+'</div>'+guessHtml(cur,'Person eingeben …');
+  if(cur.type==='bild')return '<div class="photo-wrap"><img id="photo" class="photo blur'+Number(cur.blurStep||0)+'" src="'+esc(cur.imageUrl)+'" alt="Gesuchte Person"><div id="photoStep" class="photo-step">Schärfe '+(Number(cur.blurStep||0)+1)+'/5</div></div>'+guessHtml(cur,'Person eingeben …');
+  if(cur.type==='song')return cur.isHost?songHostHtml(cur):songPlayerHtml(cur);
+  return '';
+}
+function gameHtml(){
+  var cur=state.current;if(!cur)return topHtml()+'<div class="card waiting">Runde wird geladen …</div>';
+  return topHtml()+'<div class="game-head"><span class="chip">'+esc(cur.label)+'</span><span class="chip">Runde <strong>'+state.round+'</strong></span></div><div class="card">'+timerHtml()+'<div class="category">'+esc(cur.label)+'</div><div class="question">'+esc(cur.text)+'</div>'+questionBody(cur)+answeredHtml()+'</div>';
+}
+function scoreboardHtml(){
+  var arr=[],i;for(i=0;i<state.players.length;i++)if(state.players[i].connected||state.players[i].drinks>0)arr.push(state.players[i]);
+  arr.sort(function(a,b){return a.drinks-b.drinks||a.name.localeCompare(b.name);});
+  var out='<div class="scoreboard">';for(i=0;i<arr.length;i++)out+='<div class="score-row"><div class="rank">'+(i+1)+'</div><div>'+esc(arr[i].name)+'</div><div class="score">'+arr[i].drinks+' 🍺</div></div>';return out+'</div>';
+}
+function resultDetails(r){
+  var out='',i,g;if(r.answer!==undefined)out+='<div class="correct-answer">'+esc(r.answer)+(r.unit?' '+esc(r.unit):'')+'</div>';
+  if(r.imageUrl)out+='<div class="photo-wrap" style="margin-top:12px"><img class="photo blur4" src="'+esc(r.imageUrl)+'" alt=""></div>';
+  if(r.votes&&r.votes.length){out+='<div class="detail">';for(i=0;i<r.votes.length;i++)out+='<div class="detail-row"><span>'+esc(r.votes[i].name)+'</span><span>'+r.votes[i].n+'</span></div>';out+='</div>';}
+  if(r.guesses&&r.guesses.length){out+='<div class="detail">';for(i=0;i<r.guesses.length;i++){g=r.guesses[i];out+='<div class="detail-row"><span>'+esc(g.name||'')+(g.guess!==undefined?' · '+esc(g.guess):'')+'</span><span>'+(g.sips!==undefined?g.sips+' 🍺':'')+'</span></div>';}out+='</div>';}
+  if(r.scale&&r.scale.length){out+='<div class="detail">';for(i=0;i<r.scale.length;i++){g=r.scale[i];out+='<div class="detail-row"><span>'+esc(g.name)+' · '+g.value+'</span><span>'+g.sips+' 🍺</span></div>';}out+='</div>';}
+  return out;
+}
+function resultsHtml(){
+  var r=state.result||{lines:[],drinkers:[]},host=state.you===state.hostId,i,out=topHtml()+'<div class="card"><div class="result"><div class="result-emoji">'+(r.type==='song'?'🎵':(r.drinkers&&r.drinkers.length?'🍻':'🧠'))+'</div><h2>'+(r.drinkers&&r.drinkers.length?'Aua.':'Sauber.')+'</h2>';
+  for(i=0;i<(r.lines||[]).length;i++)out+='<div class="result-line">'+esc(r.lines[i])+'</div>';
+  out+=resultDetails(r)+'</div>';
+  if(r.drinkers&&r.drinkers.length){out+='<div class="drinkers">';for(i=0;i<r.drinkers.length;i++)out+='<div class="drinker"><strong>'+esc(r.drinkers[i].name)+'</strong><strong>'+r.drinkers[i].n+' Schluck'+(r.drinkers[i].n===1?'':'e')+'</strong></div>';out+='</div>';}else out+='<div class="dry">Diese Runde bleibt trocken.</div>';
+  out+='</div><div class="section">Zwischenstand</div>'+scoreboardHtml()+'<div style="height:12px"></div>'+(host?'<div class="grid2"><button id="next" class="btn primary">Nächste Runde</button><button id="end" class="btn ghost">Spiel beenden</button></div>':'<div class="waiting">Warten auf die nächste Runde …</div>');
+  return out;
+}
+function endHtml(){var host=state.you===state.hostId;return topHtml()+'<div class="hero"><div class="eyebrow">Feierabend</div><h1 style="font-size:52px">Game <span>Over</span></h1><p class="subtitle">Gewonnen hat offiziell niemand. Einer hat nur weniger getrunken.</p></div>'+scoreboardHtml()+'<div style="height:12px"></div>'+(host?'<button id="restart" class="btn primary">Nochmal</button>':'');}
+
+function ensureYTApi(cur){
+  pendingSong=cur;
+  if(window.YT&&window.YT.Player){ytApiReady=true;createYTPlayer(cur);return;}
+  if(ytScriptLoading)return;
+  ytScriptLoading=true;
+  window.onYouTubeIframeAPIReady=function(){ytApiReady=true;ytScriptLoading=false;if(pendingSong)createYTPlayer(pendingSong);};
+  var s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;document.head.appendChild(s);
+}
+function createYTPlayer(cur){
+  if(!document.getElementById('ytPlayer')||ytPlayer)return;
+  try{
+    ytPlayer=new YT.Player('ytPlayer',{
+      height:'270',width:'100%',videoId:cur.videoId,
+      host:'https://www.youtube-nocookie.com',
+      playerVars:{controls:1,playsinline:1,autoplay:0,rel:0,origin:location.origin},
+      events:{
+        onReady:function(){ytPlayerReady=true;toast('YouTube-Player bereit.');},
+        onError:function(){ytPlayerReady=false;toast('Dieses YouTube-Video kann hier nicht abgespielt werden.');}
+      }
+    });
+  }catch(e){toast('YouTube-Player konnte nicht geladen werden.');}
+}
+function playSnippet(stage){
+  var cur=state&&state.current;if(!cur||cur.type!=='song'||!cur.isHost)return;
+  if(!ytPlayer||!ytPlayerReady){toast('Erst den YouTube-Player laden.');return;}
+  var lengths=cur.songSnippets||[1,3,7,12],seconds=lengths[stage]||1,start=Number(cur.startSeconds||0);
+  send({t:'songStage',v:stage});
+  try{
+    ytPlayer.loadVideoById({videoId:cur.videoId,startSeconds:start,endSeconds:start+seconds});
+    if(ytPlayer.unMute)ytPlayer.unMute();
+  }catch(e){toast('Ausschnitt konnte nicht gestartet werden.');}
+}
+function bind(){
+  var a=document.querySelectorAll('[data-v]'),i;
+  for(i=0;i<a.length;i++)a[i].onclick=function(){send({t:'answer',v:this.getAttribute('data-v')});};
+  a=document.querySelectorAll('.hostbtn');for(i=0;i<a.length;i++)a[i].onclick=function(){send({t:'host',id:this.getAttribute('data-id')});};
+  var f=document.getElementById('guessForm');
+  if(f)f.onsubmit=function(e){e.preventDefault();var input=document.getElementById('guessInput'),v=input.value.trim();if(v){send({t:'guess',v:v});input.value='';input.focus();}};
+  f=document.getElementById('estimate');if(f)f.onsubmit=function(e){e.preventDefault();var v=document.getElementById('estimateInput').value.trim();if(v)send({t:'answer',v:v});};
+  function click(id,msg){var e=document.getElementById(id);if(e)e.onclick=function(){send({t:msg});};}
+  click('start','start');click('next','next');click('end','end');click('restart','start');
+  var leave=document.getElementById('leaveLobby');if(leave)leave.onclick=function(){send({t:'leave'});clearJoin();state=null;feedback=null;render();};
+  var load=document.getElementById('loadYT');if(load)load.onclick=function(){ensureYTApi(state.current);};
+  var broken=document.getElementById('songBroken');if(broken)broken.onclick=function(){send({t:'songBroken'});};
+  a=document.querySelectorAll('.snippet');for(i=0;i<a.length;i++)a[i].onclick=function(){playSnippet(Number(this.getAttribute('data-stage')));};
+}
+function tick(){
+  if(!state||!state.current||state.phase!=='question')return;
+  var left=Math.max(0,state.current.deadline-Date.now()),total=state.current.total*1000;
+  var secs=document.getElementById('secs'),bar=document.getElementById('bar');
+  if(secs)secs.textContent=Math.ceil(left/1000)+' s';
+  if(bar)bar.style.transform='scaleX('+Math.max(0,Math.min(1,left/total))+')';
+}
+function render(){
+  clearInterval(timerLoop);
+  var songHost=state&&state.phase==='question'&&state.current&&state.current.type==='song'&&state.current.isHost;
+  if(!songHost&&ytPlayer)cleanupYouTube();
+  if(!state){root.innerHTML=landingHtml();bindLanding();return;}
+  if(state.phase==='lobby')root.innerHTML=lobbyHtml();
+  else if(state.phase==='loading')root.innerHTML=topHtml()+'<div class="card waiting">Nächste Runde wird vorbereitet …</div>';
+  else if(state.phase==='question')root.innerHTML=gameHtml();
+  else if(state.phase==='results')root.innerHTML=resultsHtml();
+  else root.innerHTML=endHtml();
+  bind();tick();timerLoop=setInterval(tick,250);
+}
+try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}
+render();connect();setInterval(function(){send({t:'ping'});},20000);
+})();
+</script>
+</body>
+</html>
