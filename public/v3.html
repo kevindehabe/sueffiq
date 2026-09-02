@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0914">
+<title>SüffIQ</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0914;--panel:#171022;--panel2:#211630;--line:rgba(255,255,255,.09);--text:#f8f7fb;--muted:#aaa0b7;--accent:#b8ff4a;--accent2:#8f5cff;--danger:#ff5f74;--ok:#57e39a;--warn:#ffcc58;--shadow:0 18px 60px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100dvh;background:radial-gradient(circle at 15% 0%,rgba(143,92,255,.22),transparent 36rem),radial-gradient(circle at 90% 18%,rgba(184,255,74,.10),transparent 28rem),var(--bg)}
+button,input{font:inherit}.app{width:min(680px,100%);min-height:100dvh;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px max(28px,env(safe-area-inset-bottom))}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:9px;font-weight:950;font-size:24px;letter-spacing:-.8px}.logo{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent2),#5d31bf);box-shadow:0 10px 26px rgba(143,92,255,.28)}.brand b{color:var(--accent)}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:12px;font-weight:850}.chip strong{color:var(--text);letter-spacing:.7px}
+.hero{padding:36px 4px 22px;text-align:center}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-weight:900;font-size:12px}h1{margin:9px 0 10px;font-size:clamp(46px,13vw,72px);letter-spacing:-3px;line-height:.95}h1 span{color:var(--accent)}.subtitle{margin:0 auto;max-width:520px;color:var(--muted);line-height:1.55;font-size:15px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px}.stack{display:grid;gap:11px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.input{width:100%;border:1px solid var(--line);background:#100b18;color:var(--text);border-radius:16px;padding:15px 16px;outline:none}.input:focus{border-color:rgba(184,255,74,.55);box-shadow:0 0 0 3px rgba(184,255,74,.09)}.input.code{text-transform:uppercase;letter-spacing:4px;font-weight:900;text-align:center}
+.btn{width:100%;border:0;border-radius:16px;padding:15px 16px;font-weight:950;cursor:pointer;transition:transform .12s ease,opacity .12s ease}.btn:active{transform:scale(.985)}.btn:disabled{opacity:.48}.primary{background:var(--accent);color:#11170a}.secondary{background:#2b1c40;color:var(--text);border:1px solid rgba(143,92,255,.28)}.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.danger{background:rgba(255,95,116,.12);color:#ff96a4;border:1px solid rgba(255,95,116,.22)}
+.divider{display:flex;align-items:center;gap:10px;color:#746b7e;font-size:12px;margin:3px 0}.divider:before,.divider:after{content:"";height:1px;flex:1;background:var(--line)}
+.cloud{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:20px}.pill{padding:7px 9px;border-radius:999px;border:1px solid var(--line);color:#bcb3c6;background:rgba(255,255,255,.03);font-size:11px;font-weight:800}.pill.hot{color:#ffadb9;border-color:rgba(255,95,116,.2);background:rgba(255,95,116,.06)}
+.note{margin-top:14px;border:1px solid var(--line);border-radius:15px;padding:11px 12px;color:var(--muted);font-size:12px;line-height:1.45}.note b{color:var(--text)}
+.big-code{text-align:center;font-size:42px;font-weight:1000;letter-spacing:8px;line-height:1.1}.center{text-align:center}.section{font-size:12px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1.2px;margin:20px 2px 9px}
+.players{display:grid;gap:8px}.player{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:15px}.pl{display:flex;align-items:center;gap:10px;min-width:0}.avatar{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:#281a39;color:var(--accent);font-weight:1000}.pname{font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta{color:var(--muted);font-size:11px}.mini{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:10px;padding:7px 9px;font-size:11px;font-weight:800}
+.game-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.category{color:var(--accent);font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:1000}.question{font-size:clamp(24px,7vw,35px);line-height:1.12;letter-spacing:-1px;font-weight:950;margin:12px 0 18px}
+.timer{height:6px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin:2px 0 14px}.timer>div{height:100%;width:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transform-origin:left}.timer-label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-bottom:5px;font-weight:800}
+.answers{display:grid;gap:9px}.answer{border:1px solid var(--line);background:#171020;color:var(--text);border-radius:16px;padding:14px 15px;font-weight:850;cursor:pointer;text-align:left}.answer.selected{border-color:rgba(184,255,74,.45);background:rgba(184,255,74,.09);color:var(--accent)}.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.scale button{aspect-ratio:1;border-radius:14px;border:1px solid var(--line);background:#171020;color:var(--text);font-weight:950;font-size:17px}
+.waiting{text-align:center;color:var(--muted);padding:15px 6px 3px;line-height:1.45}.answered{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}.answered span{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 8px}.answered .ok{color:#9cf2c4;border-color:rgba(87,227,154,.2);background:rgba(87,227,154,.06)}
+.target{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(184,255,74,.22);background:rgba(184,255,74,.07);color:var(--accent);padding:8px 10px;border-radius:12px;font-weight:850;font-size:13px;margin-bottom:12px}
+.hints{display:grid;gap:8px;margin:4px 0 14px}.hint{border-left:3px solid var(--accent2);background:#15101e;padding:11px 12px;border-radius:5px 13px 13px 5px;line-height:1.42}.hint small{color:var(--muted);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px}
+.guess{display:flex;gap:8px}.guess .input{flex:1}.guess .btn{width:auto;min-width:92px}.feedback{margin-top:9px;border-radius:13px;padding:10px 12px;font-size:13px;font-weight:850;display:none}.feedback.show{display:block}.feedback.near{color:#ffd878;background:rgba(255,204,88,.09);border:1px solid rgba(255,204,88,.18)}.feedback.correct{color:#8bf1ba;background:rgba(87,227,154,.09);border:1px solid rgba(87,227,154,.18)}.feedback.wrong{color:#c5b9ce;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.feed{margin-top:13px}.feed div{padding:7px 1px;border-bottom:1px solid rgba(255,255,255,.055);color:var(--muted);font-size:12px}.feed b{color:var(--text)}
+.photo-wrap{position:relative;overflow:hidden;border-radius:20px;background:#0a0710;aspect-ratio:4/3;margin-bottom:14px;border:1px solid var(--line)}.photo{width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:filter 1.2s ease,transform 1.2s ease}.blur0{filter:blur(32px)}.blur1{filter:blur(22px)}.blur2{filter:blur(14px)}.blur3{filter:blur(7px)}.blur4{filter:blur(0);transform:scale(1)}.photo-step{position:absolute;right:10px;bottom:10px;padding:7px 9px;border-radius:999px;background:rgba(0,0,0,.65);font-size:11px;font-weight:900}
+.result{text-align:center;padding:7px 2px 12px}.result .emoji{font-size:44px}.result h2{margin:5px 0 3px;font-size:27px}.result-line{color:var(--muted);line-height:1.45}.correct-answer{color:var(--accent);font-weight:950;font-size:20px;margin-top:7px}.drinkers{display:grid;gap:8px;margin-top:12px}.drinker{display:flex;justify-content:space-between;align-items:center;border-radius:15px;padding:12px 13px;background:rgba(255,95,116,.075);border:1px solid rgba(255,95,116,.14)}.drinker strong:last-child{color:#ff9baa}.dry{text-align:center;color:#91e9b8;border:1px solid rgba(87,227,154,.14);background:rgba(87,227,154,.055);border-radius:15px;padding:13px}
+.detail{margin-top:12px;display:grid;gap:7px}.detail-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 1px;border-bottom:1px solid rgba(255,255,255,.06)}.detail-row span:last-child{color:var(--muted);font-weight:850}
+.scoreboard{display:grid;gap:8px}.score-row{display:grid;grid-template-columns:32px 1fr auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}.rank{color:var(--muted);font-weight:900;text-align:center}.score{font-weight:950;color:var(--accent)}
+.toast{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translate(-50%,18px);opacity:0;pointer-events:none;z-index:10;width:min(92vw,500px);padding:12px 14px;border-radius:14px;background:#241831;border:1px solid var(--line);color:var(--text);box-shadow:var(--shadow);transition:.2s;font-weight:800;font-size:13px}.toast.show{opacity:1;transform:translate(-50%,0)}.connection{display:none;position:sticky;top:max(8px,env(safe-area-inset-top));z-index:9;margin-bottom:10px;padding:8px 10px;text-align:center;border-radius:12px;background:rgba(255,204,88,.11);border:1px solid rgba(255,204,88,.2);color:#ffd878;font-size:12px;font-weight:850}.connection.show{display:block}.footer{text-align:center;color:#716779;font-size:11px;margin-top:18px;line-height:1.45}
+@media(max-width:430px){.grid2{grid-template-columns:1fr}.big-code{font-size:36px}.card{padding:16px}.photo-wrap{aspect-ratio:1}}
+</style>
+</head>
+<body>
+<main class="app"><div id="connection" class="connection">Verbindung wird wiederhergestellt …</div><div id="root"></div></main>
+<div id="toast" class="toast"></div>
+<script>
+const root=document.getElementById('root'),connection=document.getElementById('connection'),toastEl=document.getElementById('toast');
+const KEY='sueffiq-v3';let ws=null,S=null,joined=null,feedback=null,retry=null,timerLoop=null;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const send=o=>ws&&ws.readyState===1&&ws.send(JSON.stringify(o));
+const toast=m=>{toastEl.textContent=m;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2400)};
+function store(v){joined=v;localStorage.setItem(KEY,JSON.stringify(v))}
+function clearStore(){joined=null;localStorage.removeItem(KEY)}
+function connect(){
+  clearTimeout(retry);const proto=location.protocol==='https:'?'wss:':'ws:';ws=new WebSocket(proto+'//'+location.host);
+  ws.onopen=()=>{connection.classList.remove('show');if(joined)send({t:'rejoin',code:joined.code,id:joined.id})};
+  ws.onclose=()=>{connection.classList.add('show');retry=setTimeout(connect,1200)};
+  ws.onerror=()=>{};
+  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
+    if(m.t==='joined'){store({code:m.code,id:m.id});return}
+    if(m.t==='reset'){clearStore();S=null;feedback=null;render();return}
+    if(m.t==='error'){toast(m.m);return}
+    if(m.t==='personFeedback'||m.t==='guessFeedback'){feedback={status:m.status,m:m.m};render();return}
+    if(m.t==='state'){S=m.s;feedback=S.phase==='question'?feedback:null;render()}
+  };
+}
+function top(){
+  if(!S)return '';
+  const me=S.players.find(p=>p.id===S.you);
+  return `<div class="topbar"><div class="brand"><span class="logo">🍻</span><span>Süff<b>IQ</b></span></div><div style="display:flex;gap:7px"><span class="chip"><strong>${esc(S.code)}</strong></span>${me?`<span class="chip">💧 <strong>${me.drinks}</strong></span>`:''}</div></div>`;
+}
+function landing(){
+  return `<div class="hero"><div class="eyebrow">Das Partyquiz ohne Login</div><h1>Süff<span>IQ</span></h1><p class="subtitle">Schätzen, abstimmen, Leute erraten und bei den Antworten merken, wen du eigentlich eingeladen hast.</p></div>
+  <div class="card stack"><input id="name" class="input" maxlength="18" placeholder="Dein Name"><button id="create" class="btn primary">Spiel erstellen</button><div class="divider">oder beitreten</div><input id="code" class="input code" maxlength="5" placeholder="ABCDE"><button id="join" class="btn secondary">Spiel beitreten</button></div>
+  <div class="cloud"><span class="pill">Schätzfragen</span><span class="pill">4-Antwort-Quiz</span><span class="pill">Person erraten</span><span class="pill">Bild wird schärfer</span><span class="pill hot">18+ Mix</span><span class="pill">Mehrheit</span></div>
+  <div class="note"><b>18+.</b> Alkohol ist optional. Jede Trinkstrafe funktioniert genauso mit Wasser oder alkoholfrei.</div><div class="footer">SüffIQ v3</div>`;
+}
+function bindLanding(){
+  document.getElementById('create').onclick=()=>{const name=document.getElementById('name').value.trim();if(!name)return toast('Name fehlt.');send({t:'create',name})};
+  document.getElementById('join').onclick=()=>{const name=document.getElementById('name').value.trim(),code=document.getElementById('code').value.trim();if(!name||code.length<5)return toast('Name und 5-stelligen Code eingeben.');send({t:'join',name,code})};
+}
+function players(){
+  return `<div class="players">${S.players.map(p=>`<div class="player"><div class="pl"><div class="avatar">${esc(p.name.slice(0,1).toUpperCase())}</div><div><div class="pname">${esc(p.name)} ${p.id===S.hostId?'👑':''}</div><div class="meta">${p.connected?'online':'offline'} · ${p.drinks} Schlücke</div></div></div>${S.you===S.hostId&&p.id!==S.hostId&&p.connected?`<button class="mini hostbtn" data-id="${esc(p.id)}">Host</button>`:''}</div>`).join('')}</div>`;
+}
+function lobby(){
+  const host=S.you===S.hostId;
+  return `${top()}<div class="card center"><div class="meta">Spielcode</div><div class="big-code">${esc(S.code)}</div><div class="note">Mitspieler öffnen dieselbe Seite und geben den Code ein. Beitritt geht auch während des Spiels.</div></div><div class="section">Spieler</div>${players()}<div style="height:12px"></div>${host?`<button id="start" class="btn primary">Spiel starten</button>`:`<div class="waiting">Der Host startet das Spiel.</div>`}<div class="footer">Automatischer Mix · keine Einstellungen · 18+</div>`;
+}
+function answeredRow(){
+  return `<div class="answered">${S.players.filter(p=>p.connected).map(p=>`<span class="${p.answered?'ok':''}">${p.answered?'✓ ':''}${esc(p.name)}</span>`).join('')}</div>`;
+}
+function timerHtml(){return `<div class="timer-label"><span>Runde ${S.round}</span><span id="secs">–</span></div><div class="timer"><div id="bar"></div></div>`}
+function targetName(id){return S.players.find(p=>p.id===id)?.name||'Spieler'}
+function genericGuess(cur){
+  const st=cur.yourStatus?.status;
+  return `${st==='correct'?`<div class="feedback show correct">✓ Richtig erkannt. Dein Tipp bleibt geheim.</div>`:`<form id="guessForm" class="guess"><input id="guessInput" class="input" maxlength="48" autocomplete="off" placeholder="Name eingeben …"><button class="btn primary">Tippen</button></form><div class="feedback ${feedback?'show '+esc(feedback.status):''}">${feedback?esc(feedback.m):''}</div>`}
+  ${cur.guessFeed?.length?`<div class="feed">${cur.guessFeed.slice(-8).reverse().map(g=>`<div><b>${esc(g.name)}</b>: ${esc(g.guess)}</div>`).join('')}</div>`:''}`;
+}
+function questionBody(cur){
+  if(cur.type==='nie')return `<div class="answers"><button class="answer" data-v="ja">Hab ich 😈</button><button class="answer" data-v="nein">Noch nie 😇</button></div>`;
+  if(cur.type==='wahl')return `<div class="answers">${S.players.filter(p=>p.connected).map(p=>`<button class="answer" data-v="${esc(p.id)}">${esc(p.name)}</button>`).join('')}</div>`;
+  if(cur.type==='schaetz')return `<form id="estimate" class="guess"><input id="estimateInput" inputmode="decimal" class="input" placeholder="Deine Schätzung"><button class="btn primary">Abgeben</button></form>`;
+  if(['oder','trivia','mehrheit'].includes(cur.type))return `<div class="answers">${cur.options.map((o,i)=>`<button class="answer" data-v="${i}">${String.fromCharCode(65+i)} · ${esc(o)}</button>`).join('')}</div>`;
+  if(cur.type==='skala')return `<div class="scale">${Array.from({length:10},(_,i)=>`<button data-v="${i+1}">${i+1}</button>`).join('')}</div>`;
+  if(cur.type==='wahrheit'||cur.type==='pflicht'){
+    if(cur.isTarget)return `<div class="target">🎯 Du bist dran</div><div class="grid2"><button class="btn primary" data-v="done">Gemacht</button><button class="btn danger" data-v="drink">Lieber trinken</button></div>`;
+    return `<div class="target">🎯 ${esc(targetName(cur.target))} ist dran</div><div class="waiting">Zurücklehnen und urteilen.</div>`;
+  }
+  if(cur.type==='person')return `<div class="hints">${cur.hints.map((h,i)=>`<div class="hint"><small>Hinweis ${i+1} von ${cur.hintCount}</small>${esc(h)}</div>`).join('')}</div>${genericGuess(cur)}`;
+  if(cur.type==='bild')return `<div class="photo-wrap"><img class="photo blur${cur.blurStep}" src="${esc(cur.imageUrl)}" alt="Gesuchte Person"><div class="photo-step">Schärfe ${cur.blurStep+1}/5</div></div>${genericGuess(cur)}`;
+  return '';
+}
+function game(){
+  const cur=S.current;if(!cur)return `${top()}<div class="card waiting">Runde wird geladen …</div>`;
+  return `${top()}<div class="game-head"><span class="chip">${esc(cur.label)}</span><span class="chip">Runde <strong>${S.round}</strong></span></div><div class="card">${timerHtml()}<div class="category">${esc(cur.label)}</div><div class="question">${esc(cur.text)}</div>${questionBody(cur)}${answeredRow()}</div>`;
+}
+function resultDetails(r){
+  let out='';
+  if(r.answer!==undefined)out+=`<div class="correct-answer">${esc(r.answer)}${r.unit?' '+esc(r.unit):''}</div>`;
+  if(r.imageUrl)out+=`<div class="photo-wrap" style="margin-top:12px"><img class="photo blur4" src="${esc(r.imageUrl)}" alt=""></div>${r.imageSource?`<div class="meta center">Bildquelle: Wikipedia/Wikimedia · Lizenz/Urheber auf der Quellseite</div>`:''}`;
+  if(r.votes?.length)out+=`<div class="detail">${r.votes.map(v=>`<div class="detail-row"><span>${esc(v.name)}</span><span>${v.n}</span></div>`).join('')}</div>`;
+  if(r.guesses?.length)out+=`<div class="detail">${r.guesses.map(g=>`<div class="detail-row"><span>${esc(g.name||'')} ${g.guess!==undefined?'· '+esc(g.guess):''}</span><span>${g.sips!==undefined?g.sips+' 🍺':''}</span></div>`).join('')}</div>`;
+  if(r.scale?.length)out+=`<div class="detail">${r.scale.map(g=>`<div class="detail-row"><span>${esc(g.name)} · ${g.value}</span><span>${g.sips} 🍺</span></div>`).join('')}</div>`;
+  return out;
+}
+function results(){
+  const r=S.result||{lines:[],drinkers:[]},host=S.you===S.hostId;
+  return `${top()}<div class="card"><div class="result"><div class="emoji">${r.drinkers?.length?'🍻':'🧠'}</div><h2>${r.drinkers?.length?'Aua.':'Sauber.'}</h2>${(r.lines||[]).map(x=>`<div class="result-line">${esc(x)}</div>`).join('')}${resultDetails(r)}</div>${r.drinkers?.length?`<div class="drinkers">${r.drinkers.map(d=>`<div class="drinker"><strong>${esc(d.name)}</strong><strong>${d.n} Schluck${d.n===1?'':'e'}</strong></div>`).join('')}</div>`:`<div class="dry">Diese Runde bleibt trocken.</div>`}</div>
+  <div class="section">Zwischenstand</div>${scoreboard()}<div style="height:12px"></div>${host?`<div class="grid2"><button id="next" class="btn primary">Nächste Runde</button><button id="end" class="btn ghost">Spiel beenden</button></div>`:`<div class="waiting">Warten auf die nächste Runde …</div>`}`;
+}
+function scoreboard(){
+  const sorted=[...S.players].sort((a,b)=>a.drinks-b.drinks||a.name.localeCompare(b.name));
+  return `<div class="scoreboard">${sorted.map((p,i)=>`<div class="score-row"><div class="rank">${i+1}</div><div>${esc(p.name)}</div><div class="score">${p.drinks} 🍺</div></div>`).join('')}</div>`;
+}
+function end(){
+  const host=S.you===S.hostId;
+  return `${top()}<div class="hero"><div class="eyebrow">Feierabend</div><h1 style="font-size:52px">Game <span>Over</span></h1><p class="subtitle">Gewonnen hat offiziell niemand. Einer hat nur weniger getrunken.</p></div>${scoreboard()}<div style="height:12px"></div>${host?`<button id="restart" class="btn primary">Nochmal</button>`:''}`;
+}
+function bind(){
+  document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>send({t:'answer',v:b.dataset.v}));
+  document.querySelectorAll('.hostbtn').forEach(b=>b.onclick=()=>send({t:'host',id:b.dataset.id}));
+  const f=document.getElementById('guessForm');if(f)f.onsubmit=e=>{e.preventDefault();const i=document.getElementById('guessInput'),v=i.value.trim();if(v){send({t:'guess',v});i.value=''}};
+  const est=document.getElementById('estimate');if(est)est.onsubmit=e=>{e.preventDefault();const v=document.getElementById('estimateInput').value.trim();if(v)send({t:'answer',v})};
+  const x=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};x('start',()=>send({t:'start'}));x('next',()=>send({t:'next'}));x('end',()=>send({t:'end'}));x('restart',()=>send({t:'start'}));
+}
+function tick(){
+  if(!S?.current||S.phase!=='question')return;const left=Math.max(0,S.current.deadline-Date.now()),total=S.current.total*1000;
+  const secs=document.getElementById('secs'),bar=document.getElementById('bar');if(secs)secs.textContent=Math.ceil(left/1000)+' s';if(bar)bar.style.transform=`scaleX(${Math.max(0,Math.min(1,left/total))})`;
+}
+function render(){
+  clearInterval(timerLoop);
+  if(!S){root.innerHTML=landing();bindLanding();return}
+  if(S.phase==='lobby')root.innerHTML=lobby();else if(S.phase==='loading')root.innerHTML=`${top()}<div class="card waiting">Nächste Runde wird vorbereitet …</div>`;else if(S.phase==='question')root.innerHTML=game();else if(S.phase==='results')root.innerHTML=results();else root.innerHTML=end();
+  bind();tick();timerLoop=setInterval(tick,250);
+}
+try{joined=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
+render();connect();setInterval(()=>send({t:'ping'}),20000);
+</script>
+</body>
+</html>
