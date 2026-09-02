@@ -1,0 +1,14 @@
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const Module = require('module');
+const basePath = path.join(__dirname, 'server-v461.js');
+let src = fs.readFileSync(basePath, 'utf8');
+const oldFrontend = "const addMinigameFrontend = require('./frontend-minigames-v47');";
+const newFrontend = "const addMinigameFrontend = require('./frontend-minigames-v471');";
+if (!src.includes(oldFrontend)) throw new Error('v4.7.1 Patch fehlt: Frontend-Modul');
+src = src.replace(oldFrontend, newFrontend);
+const runtime = new Module(basePath, module.parent || module);
+runtime.filename = basePath;
+runtime.paths = module.paths;
+runtime._compile(src, basePath);

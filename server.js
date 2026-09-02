@@ -1,5 +1,4 @@
 'use strict';
-
-// One-process production entrypoint. The stable 4.5 core is extended in-memory
-// with the tested browser-party features (minigames, invites, master handoff).
-require('./server-v461');
+// One-process production entrypoint. v4.7 keeps the browser-party core and
+// primes song audio once in the lobby for more reliable iPhone playback.
+require('./server-v471');
