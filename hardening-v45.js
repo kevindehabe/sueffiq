@@ -46,6 +46,26 @@ module.exports = function hardenCore(core, replaceRequired) {
     'room player limit'
   );
 
+  // One WebSocket represents one player session. Reusing it for another create/join would leak rooms.
+  core = replaceRequired(
+    core,
+    "    if (msg.t === 'create') {\n      room = createRoom(); me = uid();",
+    "    if (msg.t === 'create') {\n      if (room || me) return error('Du bist bereits in einer Lobby.');\n      room = createRoom(); me = uid();",
+    'reject duplicate create on bound socket'
+  );
+  core = replaceRequired(
+    core,
+    "    if (msg.t === 'join') {\n      const code = String(msg.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);",
+    "    if (msg.t === 'join') {\n      if (room || me) return error('Du bist bereits in einer Lobby.');\n      const code = String(msg.code || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);",
+    'reject duplicate join on bound socket'
+  );
+  core = replaceRequired(
+    core,
+    "    if (msg.t === 'rejoin') {\n      const target = rooms.get(String(msg.code || '').toUpperCase());",
+    "    if (msg.t === 'rejoin') {\n      if (room || me) return error('Du bist bereits in einer Lobby.');\n      const target = rooms.get(String(msg.code || '').toUpperCase());",
+    'reject duplicate rejoin on bound socket'
+  );
+
   // Replacing a stale connection must not let the old socket's delayed close mark the new one offline.
   core = replaceRequired(
     core,
@@ -59,6 +79,14 @@ module.exports = function hardenCore(core, replaceRequired) {
     "  ws.on('close', () => {\n    if (!room || !me || !room.players[me]) return;\n    leaveRoom(room, me);",
     "  ws.on('close', () => {\n    if (!room || !me || !room.players[me]) return;\n    if (room.players[me].ws !== ws) return;\n    leaveRoom(room, me);",
     'ignore stale socket close'
+  );
+
+  // An explicit Leave is different from a network drop: remove the player completely so they cannot ghost-rejoin.
+  core = replaceRequired(
+    core,
+    "    if (msg.t === 'leave') { leaveRoom(room, me); send(ws, { t: 'reset' }); room = null; me = null; return; }",
+    "    if (msg.t === 'leave') {\n      const oldRoom = room; const oldId = me; const wasHost = oldRoom.hostId === oldId;\n      send(ws, { t: 'reset' });\n      delete oldRoom.players[oldId];\n      oldRoom.order = oldRoom.order.filter((id) => id !== oldId);\n      if (wasHost) oldRoom.hostId = connectedIds(oldRoom)[0] || null;\n      room = null; me = null;\n      if (!connectedIds(oldRoom).length) { clearTimers(oldRoom); rooms.delete(oldRoom.code); return; }\n      if (oldRoom.phase === 'question' && allAnswered(oldRoom)) finishRound(oldRoom, 'complete');\n      else broadcast(oldRoom);\n      return;\n    }",
+    'explicit leave removes player'
   );
 
   // Basic abuse protection: tiny game messages never need to be huge or arrive hundreds per second.
