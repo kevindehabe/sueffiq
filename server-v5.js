@@ -10,8 +10,40 @@ const { WebSocketServer } = WebSocket;
 const PORT = Number(process.env.PORT || 3000);
 const INTERNAL_PORT = Number(process.env.SUEFFIQ_INTERNAL_PORT || 31337);
 const baseHtmlPath = path.join(__dirname, 'public', 'v4.html');
+const baseCorePath = path.join(__dirname, 'server-v4.js');
+const runtimeCorePath = path.join(__dirname, '.server-v4-runtime.js');
 
-const child = spawn(process.execPath, [path.join(__dirname, 'server-v4.js')], {
+function buildRuntimeCore() {
+  let core = fs.readFileSync(baseCorePath, 'utf8');
+  core = core.replace(
+    "function songPlayers(room) { return connectedIds(room).filter((id) => id !== room.hostId); }",
+    "function songPlayers(room) { return connectedIds(room); }"
+  );
+  core = core.replace(
+    "else if (cur.type === 'song') answered = id === room.hostId || !!cur.songCorrect?.[id];",
+    "else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];"
+  );
+  core = core.replace(
+    "    result.answer = `${cur.song.title} – ${cur.song.artist}`;",
+    "    result.answer = `${cur.song.title} – ${cur.song.artist}`;\n    result.videoId = cur.song.videoId;"
+  );
+  core = core.replace(
+    "    if (me === room.hostId || cur.songCorrect[me]) return;",
+    "    if (cur.songCorrect[me]) return;"
+  );
+  core = core.replace(
+    "      cur.songCorrect[me] = stage; cur.songNear[me] = false;\n      send(room.players[me].ws, { t: 'guessFeedback', status: 'correct', m: 'Richtig! Dein Tipp bleibt geheim.' });",
+    "      cur.songCorrect[me] = stage; cur.songNear[me] = false;\n      send(room.players[me].ws, { t: 'guessFeedback', status: 'correct', m: 'Richtig! Video wird aufgelöst.' });\n      finishRound(room, 'complete');\n      return;"
+  );
+  core = core.replace("version: '4.0.0'", "version: '4.1.0'");
+  core = core.replace("version: '4.0.0' }));", "version: '4.1.0' }));");
+  core = core.replace('SüffIQ v4 läuft', 'SüffIQ v4.1 core läuft');
+  fs.writeFileSync(runtimeCorePath, core, 'utf8');
+}
+
+buildRuntimeCore();
+
+const child = spawn(process.execPath, [runtimeCorePath], {
   env: { ...process.env, PORT: String(INTERNAL_PORT) },
   stdio: 'inherit',
 });
@@ -39,7 +71,7 @@ function patchedHtml() {
   html = html.replace(
     /function songHostHtml\(cur\)\{[\s\S]*?\n\}\nfunction songPlayerHtml/,
     `function songHostHtml(cur){
-  return '<div id="songHostPanel"><div class="dj"><div class="dj-title">🎵 Errate den Song</div><div class="meta">Kein Titel, kein Cover, kein Video vor der Auflösung. Tippe auf Play und hör nur den Ausschnitt.</div></div>'+ '<button id="songPlay" class="btn primary song-play">▶ Song abspielen</button>'+ '<div id="ytStealth" class="yt-stealth" aria-hidden="true"><div id="ytPlayer"></div></div>'+ '<button id="songBroken" class="btn ghost" style="margin-top:10px">Song funktioniert nicht · Runde überspringen</button></div>';
+  return '<div id="songHostPanel"><div class="dj"><div class="dj-title">🎵 Errate den Song</div><div class="meta">Kein Titel, kein Cover, kein Video vor der Auflösung.</div></div>'+ '<button id="songPlay" class="btn primary song-play">▶ Song abspielen</button>'+ '<div id="ytStealth" class="yt-stealth" aria-hidden="true"><div id="ytPlayer"></div></div>'+ '<div style="height:10px"></div>'+guessHtml(cur,'Songtitel eingeben …')+'<button id="songBroken" class="btn ghost" style="margin-top:10px">Song funktioniert nicht · Runde überspringen</button></div>';
 }
 function songPlayerHtml`
   );
@@ -91,7 +123,7 @@ function bind(){`
 
   html = html.replace(
     "  if(r.votes&&r.votes.length){",
-    "  if(r.type==='song'&&state.current&&state.current.isHost&&state.current.videoId)out+='<div class=\"yt-reveal\"><iframe src=\"https://www.youtube.com/embed/'+esc(state.current.videoId)+'?autoplay=1&playsinline=1&rel=0\" title=\"Musikvideo\" allow=\"autoplay; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>';\n  if(r.votes&&r.votes.length){"
+    "  if(r.type==='song'&&r.videoId)out+='<div class=\"yt-reveal\"><iframe src=\"https://www.youtube.com/embed/'+esc(r.videoId)+'?autoplay=1&playsinline=1&rel=0\" title=\"Musikvideo\" allow=\"autoplay; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>';\n  if(r.votes&&r.votes.length){"
   );
 
   html = html.replace(
@@ -105,7 +137,7 @@ function bind(){`
 const server = http.createServer((req, res) => {
   if (req.url === '/health' || req.url === '/healthz') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
-    res.end(JSON.stringify({ ok: true, version: '4.1.0', core: '4.0.0' }));
+    res.end(JSON.stringify({ ok: true, version: '4.1.0', core: '4.1.0' }));
     return;
   }
   if (req.url === '/robots.txt') {
@@ -159,6 +191,7 @@ server.on('upgrade', (req, socket, head) => {
 
 function shutdown() {
   try { child.kill('SIGTERM'); } catch {}
+  try { fs.unlinkSync(runtimeCorePath); } catch {}
   server.close(() => process.exit(0));
   setTimeout(() => process.exit(0), 1500).unref();
 }
