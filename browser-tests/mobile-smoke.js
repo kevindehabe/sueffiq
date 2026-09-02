@@ -35,9 +35,30 @@ async function keepOnly(page, keep) {
   assert.equal(await page.locator('.cat-toggle.active').count(), 1);
 }
 
+async function assertOfflineShell(browser) {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await page.goto(URL, { waitUntil: 'domcontentloaded' });
+  await page.locator('#create').waitFor({ state: 'visible' });
+  await page.evaluate(async () => {
+    if (!('serviceWorker' in navigator)) throw new Error('service workers unsupported');
+    await navigator.serviceWorker.ready;
+  });
+  await page.waitForTimeout(250);
+  await context.setOffline(true);
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 10000 });
+  await page.locator('#create').waitFor({ state: 'visible' });
+  assert.match(await page.locator('body').textContent(), /Spiel erstellen/);
+  await assertNoHorizontalOverflow(page, 'Chromium offline PWA shell');
+  await context.setOffline(false);
+  await context.close();
+}
+
 async function runBrowser(browserType, name) {
   const browser = await browserType.launch({ headless: true });
   try {
+    if (name.includes('Chromium')) await assertOfflineShell(browser);
+
     const hostContext = await browser.newContext({
       viewport: { width: 390, height: 844 },
       isMobile: true,
