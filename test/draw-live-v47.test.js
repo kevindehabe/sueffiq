@@ -76,7 +76,7 @@ test.before(async () => {
 
 test.after(async () => { if (child && !child.killed) child.kill('SIGTERM'); await sleep(120); });
 
-test('Zeichnen & Raten streams strokes and clear events live to the other player', async () => {
+test('Zeichnen & Raten streams RGB strokes and clear events live to the other player', async () => {
   const host = await new Client().open();
   host.send({ t: 'create', name: 'Host' });
   const hj = await host.wait((m) => m.t === 'joined');
@@ -98,7 +98,7 @@ test('Zeichnen & Raten streams strokes and clear events live to the other player
   const viewer = hq.current.isDrawer ? guest : host;
   assert.notEqual(hq.current.isDrawer, gq.current.isDrawer);
 
-  const stroke = [.1, .2, .8, .7, 2];
+  const stroke = [.1, .2, .8, .7, '#12abef'];
   drawer.send({ t: 'drawStroke', s: stroke });
   const live = await viewer.wait((m) => m.t === 'drawStroke', 4000);
   assert.deepEqual(live.stroke, stroke);
@@ -111,4 +111,12 @@ test('Zeichnen & Raten streams strokes and clear events live to the other player
   await host.state((s) => s.phase === 'end');
   await host.close();
   await guest.close();
+});
+
+test('generated UI contains RGB picker, star ratings and one-point Pong copy', async () => {
+  const html = await (await fetch(`${HTTP}/`)).text();
+  assert.match(html, /drawRgbPicker/);
+  assert.match(html, /rating-btn/);
+  assert.match(html, /automatisch gespeichert|automatisch gespeichert|automatisch gespeichert/i);
+  assert.match(html, /Ein Punkt entscheidet/);
 });
