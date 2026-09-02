@@ -61,6 +61,12 @@ src = replaceRequired(
   "result.lines.push(max === min ? 'Unentschieden – alle Zeichnungen haben gleich viele Punkte.' : 'Bewertung 1–5: Die Gesamtpunktzahl bestimmt das Ranking.');",
   'Alle-malen-Ergebnistext'
 );
+src = replaceRequired(
+  src,
+  "label: row.score + ' Ranking-Punkte'",
+  "label: row.score + ' Punkte'",
+  'Alle-malen-Punktelabel'
+);
 
 // Fix live drawing sync: v4.6 called sendExcept(), but that helper does not exist in the production core.
 // Send each stroke/clear directly to every other connected socket instead.
@@ -76,6 +82,56 @@ src = replaceRequired(
   "if (msg.t === 'drawClear' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'zeichnen' && room.current.drawerId === me) { room.current.strokes = []; for (const id of room.order) { if (id === me) continue; const p = room.players[id]; if (p?.connected) send(p.ws, { t: 'drawClear' }); } return; }",
   'Zeichnen-Live-Loeschen'
 );
+
+// Allow a full RGB/HEX color in the fifth stroke field. Keep old numeric palette strokes compatible.
+const numericStroke = "const s = Array.isArray(msg.s) ? msg.s.slice(0, 5).map(Number) : null; if (!s || s.length !== 5 || s.some((n) => !Number.isFinite(n))) return;";
+const rgbStroke = "const rawStroke = Array.isArray(msg.s) ? msg.s.slice(0, 5) : null; if (!rawStroke || rawStroke.length !== 5) return; const coords = rawStroke.slice(0, 4).map(Number); if (coords.some((n) => !Number.isFinite(n))) return; const rawColor = rawStroke[4]; const color = typeof rawColor === 'string' && /^#[0-9a-f]{6}$/i.test(rawColor) ? rawColor.toLowerCase() : clamp(Math.round(Number(rawColor) || 0), 0, 3); const s = [coords[0], coords[1], coords[2], coords[3], color];";
+src = replaceRequired(src, numericStroke, rgbStroke, 'RGB Zeichnen');
+src = replaceRequired(src, numericStroke, rgbStroke, 'RGB Alle-malen');
+const oldClampStroke = "for (let i = 0; i < 4; i += 1) s[i] = clamp(s[i], 0, 1); s[4] = clamp(Math.round(s[4]), 0, 3);";
+const newClampStroke = "for (let i = 0; i < 4; i += 1) s[i] = clamp(s[i], 0, 1);";
+src = replaceRequired(src, oldClampStroke, newClampStroke, 'RGB Farbwert Zeichnen');
+src = replaceRequired(src, oldClampStroke, newClampStroke, 'RGB Farbwert Alle-malen');
+
+// Pong: one point wins and the ball is substantially faster/smoother.
+src = replaceRequired(
+  src,
+  "const dir = direction || (Math.random() < .5 ? -1 : 1); cur.pongBall = { x: .5, y: .5, vx: dir * .012, vy: (Math.random() - .5) * .012 }; cur.pongPauseUntil = Date.now() + 850;",
+  "const dir = direction || (Math.random() < .5 ? -1 : 1); cur.pongBall = { x: .5, y: .5, vx: dir * .026, vy: (Math.random() - .5) * .022 }; cur.pongPauseUntil = Date.now() + 350;",
+  'Pong Startgeschwindigkeit'
+);
+src = replaceRequired(
+  src,
+  "if (room.players[left]?.connected) cur.pongScore.left = 3; else if (room.players[right]?.connected) cur.pongScore.right = 3;",
+  "if (room.players[left]?.connected) cur.pongScore.left = 1; else if (room.players[right]?.connected) cur.pongScore.right = 1;",
+  'Pong Disconnect Punkt'
+);
+src = replaceRequired(
+  src,
+  "if (b.vx < 0 && b.x <= .075 && b.x >= .025 && lh) { b.x = .075; b.vx = Math.min(.024, Math.abs(b.vx) * 1.055); b.vy += (b.y - Number(cur.pongPaddles.left || .5)) * .035; }",
+  "if (b.vx < 0 && b.x <= .075 && b.x >= .025 && lh) { b.x = .075; b.vx = Math.min(.045, Math.abs(b.vx) * 1.08); b.vy += (b.y - Number(cur.pongPaddles.left || .5)) * .05; }",
+  'Pong linker Schlaeger'
+);
+src = replaceRequired(
+  src,
+  "if (b.vx > 0 && b.x >= .925 && b.x <= .975 && rh) { b.x = .925; b.vx = -Math.min(.024, Math.abs(b.vx) * 1.055); b.vy += (b.y - Number(cur.pongPaddles.right || .5)) * .035; }",
+  "if (b.vx > 0 && b.x >= .925 && b.x <= .975 && rh) { b.x = .925; b.vx = -Math.min(.045, Math.abs(b.vx) * 1.08); b.vy += (b.y - Number(cur.pongPaddles.right || .5)) * .05; }",
+  'Pong rechter Schlaeger'
+);
+src = replaceRequired(
+  src,
+  "if (b.x < -.03) { cur.pongScore.right += 1; if (cur.pongScore.right >= 3) return finishRound(room, 'complete'); resetPongBall(cur, -1); }",
+  "if (b.x < -.03) { cur.pongScore.right += 1; if (cur.pongScore.right >= 1) return finishRound(room, 'complete'); resetPongBall(cur, -1); }",
+  'Pong Sieg rechts'
+);
+src = replaceRequired(
+  src,
+  "if (b.x > 1.03) { cur.pongScore.left += 1; if (cur.pongScore.left >= 3) return finishRound(room, 'complete'); resetPongBall(cur, 1); }",
+  "if (b.x > 1.03) { cur.pongScore.left += 1; if (cur.pongScore.left >= 1) return finishRound(room, 'complete'); resetPongBall(cur, 1); }",
+  'Pong Sieg links'
+);
+src = replaceRequired(src, "broadcast(room); setTimeout(tick, 55).unref?.();", "broadcast(room); setTimeout(tick, 40).unref?.();", 'Pong Tickrate');
+src = replaceRequired(src, "setTimeout(tick, 250).unref?.();", "setTimeout(tick, 150).unref?.();", 'Pong Start');
 
 const runtime = new Module(basePath, module.parent || module);
 runtime.filename = basePath;
