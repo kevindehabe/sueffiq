@@ -1,0 +1,116 @@
+'use strict';
+
+const tuneBase = require('./frontend-draw-timing-v47');
+
+function mustReplace(source, needle, replacement, label) {
+  if (!source.includes(needle)) throw new Error(`iTunes-Frontend-Patch fehlt: ${label}`);
+  return source.replace(needle, replacement);
+}
+
+module.exports = function tuneITunesSongs(html) {
+  html = tuneBase(html);
+
+  html = mustReplace(html, '</style>', `
+.itunes-song-status{margin:10px 0 12px;padding:10px 12px;border:1px solid rgba(143,92,255,.22);border-radius:13px;background:rgba(143,92,255,.055);color:var(--muted);font-size:12px;font-weight:800;text-align:center}
+.itunes-song-status.ready{color:#91e9b8;border-color:rgba(87,227,154,.22);background:rgba(87,227,154,.055)}
+.itunes-art{display:grid;place-items:center;margin:12px auto 2px}.itunes-art img{width:min(220px,65vw);aspect-ratio:1;object-fit:cover;border-radius:18px;border:1px solid var(--line)}
+</style>`, 'iTunes styles');
+
+  // Replace the complete song UI. There is no visible sound-unlock or YouTube control anymore.
+  const songFunctions = /function songHostHtml\(cur\)\{[\s\S]*?\n\}\nfunction songPlayerHtml\(cur\)\{[\s\S]*?\n\}\nfunction questionBody\(cur\)\{/;
+  if (!songFunctions.test(html)) throw new Error('iTunes-Frontend-Patch fehlt: song UI');
+  html = html.replace(songFunctions, `function songHostHtml(cur){
+  return '<div id="songHostPanel"><div class="dj"><div class="dj-title">🎵 Errate den Song</div><div class="meta">iTunes-Preview · ein Knopf startet denselben Ausschnitt auf allen Handys gleichzeitig.</div></div><div id="itunesSongStatus" class="itunes-song-status">Song wird vorgeladen …</div><button id="songPlay" class="btn primary song-play">▶ Song starten</button><div style="height:10px"></div>'+guessHtml(cur,'Songtitel eingeben …')+'<button id="songBroken" class="btn ghost" style="margin-top:10px">Song funktioniert nicht · Runde überspringen</button></div>';
+}
+function songPlayerHtml(cur){
+  return '<div class="song-stage">🎵 iTunes-Preview</div><div id="itunesSongStatus" class="itunes-song-status">Song wird vorgeladen … Der Master startet für alle.</div>'+guessHtml(cur,'Songtitel eingeben …');
+}
+function questionBody(cur){`);
+
+  // The old result page embedded YouTube. With iTunes we show the artwork instead.
+  html = html.replace(
+    /  if\(r\.type==='song'&&r\.videoId\)out\+='[^\n]*\n/,
+    "  if(r.type==='song'&&r.artworkUrl)out+='<div class=\"itunes-art\"><img src=\"'+esc(r.artworkUrl)+'\" alt=\"Albumcover\"></div>';\n"
+  );
+
+  const anchor = "try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}";
+  const extension = String.raw`
+var ITUNES_SILENCE='data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQIAAAAAAA==';
+var itunesAudio=null,itunesAudioPrimed=false,itunesLoadedUrl='',itunesSyncTimer=null,itunesNeedsTap=false,serverClockOffset=0;
+function getITunesAudio(){
+  if(itunesAudio)return itunesAudio;
+  itunesAudio=new Audio();itunesAudio.preload='auto';itunesAudio.setAttribute('playsinline','');itunesAudio.setAttribute('webkit-playsinline','');itunesAudio.volume=1;
+  return itunesAudio;
+}
+function updateITunesStatus(text,ready){var e=document.getElementById('itunesSongStatus');if(!e)return;e.textContent=text||'';e.className='itunes-song-status'+(ready?' ready':'');}
+function primeITunesAudio(){
+  if(itunesAudioPrimed)return;
+  var a=getITunesAudio();
+  try{
+    var previous=a.src;a.src=ITUNES_SILENCE;a.volume=.01;
+    var p=a.play();
+    if(p&&p.then)p.then(function(){itunesAudioPrimed=true;try{a.pause();a.currentTime=0;a.volume=1;}catch(e){}if(previous){a.src=previous;try{a.load();}catch(e){}}}).catch(function(){});
+    else{itunesAudioPrimed=true;try{a.pause();a.volume=1;}catch(e){}}
+  }catch(e){}
+}
+function prepareITunesSong(cur){
+  if(!cur||cur.type!=='song'||!cur.previewUrl)return;
+  var a=getITunesAudio(),url=String(cur.previewUrl||'');
+  if(!url)return;
+  if(itunesLoadedUrl!==url){
+    itunesLoadedUrl=url;try{a.pause();a.src=url;a.preload='auto';a.load();}catch(e){}
+  }
+  var ready=function(){updateITunesStatus(cur.isHost?'✓ Song bereit · du startest für alle':'✓ Song bereit · warte auf den Master',true);};
+  if(a.readyState>=2)ready();else{updateITunesStatus('Song wird vorgeladen …',false);a.oncanplay=ready;a.oncanplaythrough=ready;}
+}
+function stopITunesAudio(){if(itunesSyncTimer){clearTimeout(itunesSyncTimer);itunesSyncTimer=null;}try{if(itunesAudio)itunesAudio.pause();}catch(e){}lastSongSyncKey=null;}
+function resumeBlockedITunes(){
+  if(!itunesNeedsTap||!itunesAudio)return;itunesNeedsTap=false;
+  var p;try{p=itunesAudio.play();}catch(e){return;}
+  if(p&&p.catch)p.catch(function(){itunesNeedsTap=true;});
+}
+function playSyncedITunes(m,force){
+  var cur=state&&state.current;if(!cur||cur.type!=='song')return;
+  var url=String(m.previewUrl||cur.previewUrl||'');if(!url){toast('Für diesen Song wurde keine iTunes-Vorschau gefunden.');return;}
+  var syncKey=String(state.round)+':'+String(Number(m.at||0));if(lastSongSyncKey===syncKey&&!force)return;lastSongSyncKey=syncKey;
+  prepareITunesSong({type:'song',previewUrl:url,isHost:cur.isHost});
+  var a=getITunesAudio();if(itunesSyncTimer){clearTimeout(itunesSyncTimer);itunesSyncTimer=null;}
+  var serverNow=Date.now()+Number(serverClockOffset||0),delay=Math.max(0,Number(m.at||serverNow)-serverNow);
+  itunesSyncTimer=setTimeout(function(){
+    if(!state||!state.current||state.current.type!=='song')return;
+    var nowServer=Date.now()+Number(serverClockOffset||0),late=Math.max(0,(nowServer-Number(m.at||nowServer))/1000);
+    try{if(itunesLoadedUrl!==url){a.src=url;itunesLoadedUrl=url;}if(Number.isFinite(late)&&late>0&&a.duration&&late<a.duration-.25)a.currentTime=late;else if(late>0&&late<29)a.currentTime=late;a.volume=1;var p=a.play();if(p&&p.catch)p.catch(function(){itunesNeedsTap=true;toast('Tippe einmal auf den Bildschirm, dann läuft der Song weiter.');});updateITunesStatus('▶ Song läuft',true);}catch(e){itunesNeedsTap=true;toast('Tippe einmal auf den Bildschirm, dann läuft der Song weiter.');}
+  },delay);
+}
+
+// Disable the legacy YouTube path. Existing callers now prepare the persistent HTML5 audio element instead.
+ensureYTApi=function(cur){prepareITunesSong(cur);};
+createYTPlayer=function(cur){prepareITunesSong(cur);};
+prepareLobbyAudio=function(){};
+activateLobbyAudio=function(){primeITunesAudio();};
+cleanupYouTube=function(){stopITunesAudio();};
+playSyncedSong=function(m,force){playSyncedITunes(m,force);};
+playSongButton=function(){var cur=state&&state.current;if(!cur||cur.type!=='song'||!cur.isHost)return;primeITunesAudio();prepareITunesSong(cur);send({t:'songPlay'});};
+
+// v4.7 added a separate lobby sound button. iTunes playback is primed invisibly by the normal entry tap instead.
+if(typeof v471LobbyHtml==='function')lobbyHtml=v471LobbyHtml;
+var itunesBindLanding=bindLanding;
+bindLanding=function(){
+  itunesBindLanding();
+  var c=document.getElementById('create'),j=document.getElementById('join');
+  if(c){var oc=c.onclick;c.onclick=function(e){primeITunesAudio();return oc&&oc.call(this,e);};}
+  if(j){var oj=j.onclick;j.onclick=function(e){primeITunesAudio();return oj&&oj.call(this,e);};}
+};
+var itunesRender=render;
+render=function(){
+  if(state&&state.now)serverClockOffset=Number(state.now)-Date.now();
+  itunesRender();
+  if(state&&state.phase==='question'&&state.current&&state.current.type==='song')prepareITunesSong(state.current);
+};
+document.addEventListener('pointerdown',function(){primeITunesAudio();resumeBlockedITunes();},{capture:true});
+document.addEventListener('touchstart',function(){primeITunesAudio();resumeBlockedITunes();},{capture:true,passive:true});
+`;
+
+  html = mustReplace(html, anchor, extension + '\n' + anchor, 'iTunes audio runtime');
+  return html;
+};
