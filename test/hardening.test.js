@@ -113,7 +113,7 @@ test('PWA endpoints and standalone metadata are present', async () => {
 });
 
 test('rejoin replacing a still-open socket does not mark the new connection offline', async () => {
-  const { c: host, joined: room, state } = await create('ReconnectHost');
+  const { c: host, joined: room } = await create('ReconnectHost');
   const oldGuest = await join(room.code, 'ReconnectGuest');
   await host.state((s) => s.players.filter((p) => p.connected).length === 2);
 
@@ -154,7 +154,7 @@ test('continuous song scoring is based on elapsed listening time', async () => {
   const result = await host.state((s) => s.phase === 'results', 7000);
   assert.match(result.result.lines.join(' '), /Je schneller/);
   assert.equal(result.result.drinkers.length, 2);
-  for (const d of result.result.drinkers) assert.equal(d.sips, 1, `${d.name} should get 1 sip after about 6 seconds`);
+  for (const d of result.result.drinkers) assert.equal(d.n, 1, `${d.name} should get 1 sip after about 6 seconds`);
 
   await host.close(); await guest.c.close();
 });
