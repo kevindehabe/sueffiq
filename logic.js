@@ -1,6 +1,7 @@
 'use strict';
 
 const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const balancedMax = (maxSips) => clamp(Number(maxSips) || 0, 0, 3);
 
 function normalizeText(value) {
   return String(value || '')
@@ -13,22 +14,36 @@ function normalizeText(value) {
     .replace(/\s+/g, ' ');
 }
 
+// Optimal-string-alignment distance: normal spelling errors plus one adjacent
+// letter swap count as a single typo (e.g. "brintey" vs "britney").
 function levenshtein(a, b) {
   a = normalizeText(a);
   b = normalizeText(b);
   if (!a.length) return b.length;
   if (!b.length) return a.length;
-  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
-  const cur = new Array(b.length + 1);
+
+  const d = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i += 1) d[i][0] = i;
+  for (let j = 0; j <= b.length; j += 1) d[0][j] = j;
+
   for (let i = 1; i <= a.length; i += 1) {
-    cur[0] = i;
     for (let j = 1; j <= b.length; j += 1) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      cur[j] = Math.min(cur[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        d[i][j - 1] + 1,
+        d[i - 1][j - 1] + cost
+      );
+      if (
+        i > 1 && j > 1 &&
+        a[i - 1] === b[j - 2] &&
+        a[i - 2] === b[j - 1]
+      ) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
     }
-    for (let j = 0; j <= b.length; j += 1) prev[j] = cur[j];
   }
-  return prev[b.length];
+  return d[a.length][b.length];
 }
 
 function similarity(a, b) {
@@ -74,6 +89,7 @@ function matchPersonGuess(person, guess) {
 }
 
 function voteSipMap(votes, maxSips = 5) {
+  maxSips = balancedMax(maxSips);
   const counts = {};
   for (const target of Object.values(votes || {})) {
     if (!target) continue;
@@ -85,6 +101,7 @@ function voteSipMap(votes, maxSips = 5) {
 }
 
 function estimateResults(guesses, correct, maxSips = 5) {
+  maxSips = balancedMax(maxSips);
   const rows = Object.entries(guesses || {})
     .map(([id, guess]) => ({ id, guess: Number(guess), diff: Math.abs(Number(guess) - Number(correct)) }))
     .filter((row) => Number.isFinite(row.guess) && Number.isFinite(row.diff))
@@ -104,6 +121,7 @@ function estimateResults(guesses, correct, maxSips = 5) {
 }
 
 function binaryMinority(votes, maxSips = 3) {
+  maxSips = balancedMax(maxSips);
   const values = Object.values(votes || {});
   const counts = new Map();
   values.forEach((v) => counts.set(String(v), (counts.get(String(v)) || 0) + 1));
@@ -120,6 +138,7 @@ function binaryMinority(votes, maxSips = 3) {
 }
 
 function majorityResults(votes, maxSips = 5) {
+  maxSips = balancedMax(maxSips);
   const values = Object.values(votes || {}).map(String);
   const counts = {};
   values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
@@ -141,6 +160,7 @@ function median(values) {
 }
 
 function scaleResults(votes, maxSips = 5) {
+  maxSips = balancedMax(maxSips);
   const center = median(Object.values(votes || {}));
   if (center === null) return { median: null, rows: [] };
   const rows = Object.entries(votes || {}).map(([id, value]) => {
