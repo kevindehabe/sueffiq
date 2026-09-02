@@ -62,6 +62,21 @@ src = replaceRequired(
   'Alle-malen-Ergebnistext'
 );
 
+// Fix live drawing sync: v4.6 called sendExcept(), but that helper does not exist in the production core.
+// Send each stroke/clear directly to every other connected socket instead.
+src = replaceRequired(
+  src,
+  "room.current.strokes.push(s); if (room.current.strokes.length > 1200) room.current.strokes.shift(); sendExcept(room, me, { t: 'drawStroke', stroke: s }); return;",
+  "room.current.strokes.push(s); if (room.current.strokes.length > 1200) room.current.strokes.shift(); for (const id of room.order) { if (id === me) continue; const p = room.players[id]; if (p?.connected) send(p.ws, { t: 'drawStroke', stroke: s }); } return;",
+  'Zeichnen-Live-Striche'
+);
+src = replaceRequired(
+  src,
+  "if (msg.t === 'drawClear' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'zeichnen' && room.current.drawerId === me) { room.current.strokes = []; sendExcept(room, me, { t: 'drawClear' }); return; }",
+  "if (msg.t === 'drawClear' && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'zeichnen' && room.current.drawerId === me) { room.current.strokes = []; for (const id of room.order) { if (id === me) continue; const p = room.players[id]; if (p?.connected) send(p.ws, { t: 'drawClear' }); } return; }",
+  'Zeichnen-Live-Loeschen'
+);
+
 const runtime = new Module(basePath, module.parent || module);
 runtime.filename = basePath;
 runtime.paths = module.paths;
