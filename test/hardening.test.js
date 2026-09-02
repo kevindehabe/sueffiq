@@ -85,7 +85,7 @@ test.before(async () => {
   child.once('exit', (code) => { if (code && stderr) process.stderr.write(stderr); });
   const h = await waitHealth();
   assert.equal(h.ok, true);
-  assert.equal(h.version, '4.6.1');
+  assert.equal(h.version, '4.7.0');
 });
 
 test.after(async () => { if (child && !child.killed) child.kill('SIGTERM'); await sleep(200); });
