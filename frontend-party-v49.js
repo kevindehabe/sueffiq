@@ -62,44 +62,18 @@ module.exports = function tunePartyV49(html) {
 .party-rule-title{flex:0 0 auto;font-size:10px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .party-rule-chip{flex:0 0 auto;max-width:78vw;padding:7px 9px;border-radius:999px;background:#20172a;border:1px solid rgba(184,255,74,.18);font-size:10px;font-weight:850;white-space:nowrap;color:var(--text)}
 .party-rule-ended{position:fixed;left:10px;right:10px;z-index:10070;padding:11px 12px;border-radius:14px;background:rgba(63,18,24,.97);border:1px solid rgba(255,95,108,.48);box-shadow:0 10px 30px rgba(0,0,0,.38);font-size:11px;font-weight:850;line-height:1.35;color:#ffd9dc;transform:translateY(-8px);opacity:0;transition:opacity .18s ease,transform .18s ease;pointer-events:none}.party-rule-ended.show{opacity:1;transform:translateY(0)}.party-rule-ended b{display:block;margin-bottom:3px;color:#ff7884;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}.party-rule-ended{font-size:10px}}
+.party-rule-round-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0 10px}.party-rule-round-head .chip:first-child{color:var(--accent);border-color:rgba(184,255,74,.28)}
+.party-rule-round-card{overflow:hidden;text-align:center;border-color:rgba(184,255,74,.24);background:radial-gradient(circle at 50% 0,rgba(184,255,74,.12),transparent 52%),var(--panel)}
+.party-rule-round-icon{font-size:48px;line-height:1;margin:4px 0 10px}.party-rule-round-label{color:var(--accent);font-size:11px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase}.party-rule-round-card h2{margin:8px 0 7px;font-size:25px}.party-rule-round-text{margin:14px 0 18px;padding:18px 14px;border-radius:16px;background:#16101e;border:1px solid rgba(255,255,255,.09);font-size:19px;font-weight:950;line-height:1.35;color:var(--text)}
+.party-rule-progress{margin:4px 0 12px;color:var(--muted);font-size:12px;font-weight:850}.party-rule-seen-list{display:grid;gap:7px;margin:0 0 14px;text-align:left}.party-rule-seen-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.035);font-size:12px;font-weight:850}.party-rule-seen-state{color:var(--muted)}.party-rule-seen-row.seen .party-rule-seen-state{color:var(--accent)}
+.party-rule-wait{padding:12px;border-radius:13px;background:rgba(143,92,255,.08);color:var(--muted);font-size:12px;font-weight:850;line-height:1.4}.party-rule-ready{color:var(--accent)}
+@media(max-width:430px){.photo-wrap{aspect-ratio:3/4!important;max-height:58vh!important}.party-rule-chip{font-size:9.5px}.party-rule-ended{font-size:10px}.party-rule-round-text{font-size:17px;padding:16px 12px}}
 </style>`, 'Regeln/Bild/Home-CSS');
 
   const anchor = "try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}";
   const extension = String.raw`
-var PARTY_RULES=[
-  'Ja und Nein sind verboten. Erwischt? 1 Schluck.',
-  'Glas nur mit links. Rechte Hand am Getränk = 1 Schluck.',
-  'Vornamen sind tabu. Nennt euch Chef, Legende oder Problemfall.',
-  'Der Roundmaster heißt ab jetzt nur noch Eure Hoheit.',
-  'Wer Digga sagt, nimmt 1 Schluck. Viel Erfolg.',
-  'Fragen sind verboten. Wer eine stellt, beantwortet sie mit 1 Schluck.',
-  'Das Wort ich ist verboten. Ego-Pause.',
-  'Vor jedem Schluck muss Auf die Wissenschaft gesagt werden.',
-  'Mit dem Finger auf jemanden zeigen = selber 1 Schluck.',
-  'Wer außerhalb von SüffIQ am Handy hängt, nimmt 1 Schluck.',
-  'Beim Anstoßen kein Blickkontakt? 1 Schluck wegen Respektlosigkeit.',
-  'Wer über jemanden lacht, der trinken muss, trinkt solidarisch mit.',
-  'Das Wort trinken ist verboten. Umschreibungen ausdrücklich erwünscht.',
-  'Jeder Satz muss mit Bro oder Bruder enden. Vergessen = 1 Schluck.',
-  'Wer flucht, nimmt 1 Schluck. Ja, auch scheiße zählt.',
-  'Wer eine aktive Regel erklärt, nimmt für die unnötige Pressekonferenz 1 Schluck.'
-];
-var PARTY_RULE_MAX_ROUNDS=10;
-var PARTY_RULE_CHANCE=28;
-var partyRuleLastRound=0,partyRuleLastRules=[],partyRuleEndTimer=null;
-function partyHash(text){var h=2166136261>>>0,s=String(text||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-function partyRuleStarts(code,round){
-  return (partyHash(String(code)+'|regel-start|'+round)%100)<PARTY_RULE_CHANCE;
-}
-function partyRuleIndex(code,start,used){var idx=partyHash(String(code)+'|regel|'+start)%PARTY_RULES.length;for(var n=0;n<PARTY_RULES.length;n++){var j=(idx+n)%PARTY_RULES.length;if(used.indexOf(j)<0)return j;}return idx;}
-function activePartyRules(s){
-  var r=Number(s&&s.round||0);if(r<1)return[];
-  var first=Math.max(1,r-PARTY_RULE_MAX_ROUNDS+1),starts=[];
-  for(var x=first;x<=r;x++)if(partyRuleStarts(s.code,x))starts.push(x);
-  var used=[],out=[];for(var i=0;i<starts.length;i++){var idx=partyRuleIndex(s.code,starts[i],used);used.push(idx);out.push(PARTY_RULES[idx]);}
-  return out.slice(-2);
-}
+var partyRuleLastRules=[],partyRuleEndTimer=null,partyRulesInitialized=false;
+function activePartyRules(s){return s&&Array.isArray(s.activeRules)?s.activeRules.slice(-2):[];}
 function ensurePartyRuleDock(){var d=document.getElementById('partyRuleDock');if(d)return d;d=document.createElement('div');d.id='partyRuleDock';d.className='party-rule-dock';d.setAttribute('aria-live','polite');document.body.appendChild(d);return d;}
 function showPartyRuleEnded(rules){
   if(!rules||!rules.length)return;
@@ -122,21 +96,39 @@ function bindPartyHome(){
   b.onclick=partyGoHome;
   b.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();partyGoHome();}};
 }
+function partyRuleRoundHtml(){
+  var r=state&&state.ruleRound;if(!r)return topHtml()+'<div class="card waiting">Regelrunde wird vorbereitet …</div>';
+  var out=topHtml()+'<div class="party-rule-round-head"><span class="chip">📌 Eigene Regelrunde</span><span class="chip">vor Runde <strong>'+Number(r.startRound||state.round+1)+'</strong></span></div>';
+  out+='<div class="card party-rule-round-card"><div class="party-rule-round-icon">📜</div><div class="party-rule-round-label">Neue Regel</div><h2>Alle einmal lesen</h2><div class="party-rule-round-text">'+esc(r.text||'')+'</div>';
+  out+='<div class="party-rule-progress">'+Number(r.seenCount||0)+' / '+Number(r.total||0)+' haben die Regel gesehen</div><div class="party-rule-seen-list">';
+  var players=Array.isArray(r.players)?r.players:[];for(var i=0;i<players.length;i++){var p=players[i];out+='<div class="party-rule-seen-row '+(p.seen?'seen':'')+'"><span>'+esc(p.name||'Spieler')+(p.id===state.hostId?' 👑':'')+'</span><span class="party-rule-seen-state">'+(p.seen?'✓ gesehen':'noch offen')+'</span></div>';}
+  out+='</div>';
+  if(!r.youSeen)out+='<button id="partyRuleSeen" class="btn primary">✓ Regel gesehen</button>';
+  else if(r.isHost&&r.allSeen)out+='<button id="partyRuleContinue" class="btn primary">Weiter zur Runde</button><div class="party-rule-wait party-rule-ready" style="margin-top:9px">Alle sind bereit. Mit Weiter wird die Regel oben angepinnt.</div>';
+  else if(r.isHost)out+='<div class="party-rule-wait">Du hast bestätigt. Warte noch, bis alle anderen die Regel gesehen haben.</div>';
+  else out+='<div class="party-rule-wait">Bestätigt ✓ Der Host startet gleich die normale Runde.</div>';
+  return out+'</div>';
+}
+function bindPartyRuleRound(){
+  var seen=document.getElementById('partyRuleSeen');if(seen)seen.onclick=function(){seen.disabled=true;seen.textContent='Wird bestätigt …';send({t:'ruleSeen'});};
+  var next=document.getElementById('partyRuleContinue');if(next)next.onclick=function(){next.disabled=true;next.textContent='Runde wird gestartet …';send({t:'ruleContinue'});};
+}
+function renderPartyRuleRound(){clearInterval(timerLoop);root.innerHTML=partyRuleRoundHtml();bindPartyRuleRound();bindPartyHome();}
 function updatePartyRuleDock(){
   var s=state,d=document.getElementById('partyRuleDock');
-  if(!s||!joined||s.phase==='lobby'||s.phase==='end'||Number(s.round||0)<1){if(d)d.style.display='none';document.body.style.paddingTop='';partyRuleLastRound=Number(s&&s.round||0);partyRuleLastRules=[];bindPartyHome();return;}
-  var round=Number(s.round||0),rules=activePartyRules(s),ended=[];
-  if(partyRuleLastRound>0&&round!==partyRuleLastRound){for(var e=0;e<partyRuleLastRules.length;e++)if(rules.indexOf(partyRuleLastRules[e])<0)ended.push(partyRuleLastRules[e]);}
-  partyRuleLastRound=round;partyRuleLastRules=rules.slice();
+  if(!s||!joined||s.phase==='lobby'||s.phase==='end'){if(d)d.style.display='none';document.body.style.paddingTop='';partyRuleLastRules=[];partyRulesInitialized=false;bindPartyHome();return;}
+  var rules=activePartyRules(s),ended=[];
+  if(partyRulesInitialized){for(var e=0;e<partyRuleLastRules.length;e++){var stillActive=false;for(var a=0;a<rules.length;a++)if(rules[a].id===partyRuleLastRules[e].id)stillActive=true;if(!stillActive)ended.push(partyRuleLastRules[e].text);}}
+  partyRuleLastRules=rules.slice();partyRulesInitialized=true;
   if(!rules.length){if(d)d.style.display='none';document.body.style.paddingTop='';if(ended.length)showPartyRuleEnded(ended);bindPartyHome();return;}
   d=ensurePartyRuleDock();var out='<div class="party-rule-row"><span class="party-rule-title">📌 Regeln</span>';
-  for(var i=0;i<rules.length;i++)out+='<span class="party-rule-chip">'+esc(rules[i])+'</span>';
+  for(var i=0;i<rules.length;i++)out+='<span class="party-rule-chip">'+esc(rules[i].text||'')+'</span>';
   out+='</div>';d.innerHTML=out;d.style.display='block';
   requestAnimationFrame(function(){document.body.style.paddingTop=Math.ceil(d.getBoundingClientRect().height)+'px';if(ended.length)showPartyRuleEnded(ended);});
   bindPartyHome();
 }
 var partyV49Render=render;
-render=function(){partyV49Render();updatePartyRuleDock();};
+render=function(){if(state&&state.phase==='rule'){renderPartyRuleRound();updatePartyRuleDock();return;}partyV49Render();updatePartyRuleDock();};
 window.addEventListener('resize',function(){if(document.getElementById('partyRuleDock'))updatePartyRuleDock();});
 `;
   html = replaceOnce(html, anchor, extension + '\n' + anchor, 'Zufällige-Regeln/Home-Runtime');

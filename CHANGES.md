@@ -1,5 +1,12 @@
 # CHANGES – SüffIQ
 
+## Aktuell
+
+- Songvorschauen laufen über einen abgesicherten Same-Origin-Audiopfad und können auf Mobilgeräten direkt in der Songkarte freigeschaltet beziehungsweise synchron fortgesetzt werden.
+- Hausregeln erscheinen als synchronisierte Regelrunde. Erst nach der Bestätigung aller Spieler kann der Host fortfahren; anschließend bleibt die Regel oben angepinnt.
+- Die Zeichenpalette hat einen deutlich sichtbaren, breiteren Radierer erhalten.
+- Neues Minigame „Zeitgefühl“: zufällige Zielzeit zwischen 2 und 10 Sekunden, unsichtbarer Lauf und serverseitige Start-/Stoppmessung.
+
 ## v3.0.0
 
 - Neuer 18+-Fragenmix mit deutlich frecheren „Ich hab noch nie“, Wahl-, Wahrheit- und Pflichtkarten ergänzt.

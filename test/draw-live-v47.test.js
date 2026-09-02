@@ -103,6 +103,11 @@ test('Zeichnen & Raten streams RGB strokes and clear events live to the other pl
   const live = await viewer.wait((m) => m.t === 'drawStroke', 4000);
   assert.deepEqual(live.stroke, stroke);
 
+  const eraseStroke = [.2, .3, .6, .5, '#ffffff'];
+  drawer.send({ t: 'drawStroke', s: eraseStroke });
+  const erased = await viewer.wait((m) => m.t === 'drawStroke', 4000);
+  assert.deepEqual(erased.stroke, eraseStroke);
+
   drawer.send({ t: 'drawClear' });
   const cleared = await viewer.wait((m) => m.t === 'drawClear', 4000);
   assert.equal(cleared.t, 'drawClear');
@@ -116,6 +121,9 @@ test('Zeichnen & Raten streams RGB strokes and clear events live to the other pl
 test('generated UI contains RGB picker, star ratings and one-point Pong copy', async () => {
   const html = await (await fetch(`${HTTP}/`)).text();
   assert.match(html, /drawRgbPicker/);
+  assert.match(html, /id=\"drawEraser\"/);
+  assert.match(html, /⌫ Radierer/);
+  assert.match(html, /color==='#ffffff'/);
   assert.match(html, /rating-btn/);
   assert.match(html, /automatisch gespeichert|automatisch gespeichert|automatisch gespeichert/i);
   assert.match(html, /Ein Punkt entscheidet/);

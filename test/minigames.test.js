@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { randomSequence, reactionResults, tapResults, memoryResults } = require('../minigames');
+const { randomSequence, reactionResults, tapResults, memoryResults, blindTimerResults } = require('../minigames');
 
 test('random color sequence uses four colors and requested length', () => {
   const seq = randomSequence(12);
@@ -29,5 +29,13 @@ test('memory rewards full sequence and keeps penalties at two or less', () => {
   assert.equal(out.ranked[0].id, 'a');
   assert.equal(out.sips.a, 0);
   assert.equal(out.sips.b, 1);
+  assert.equal(out.sips.c, 2);
+});
+
+test('blind timer ranks the smallest distance from the hidden target first', () => {
+  const out = blindTimerResults({ a: { elapsed: 2985 }, b: { elapsed: 3470 }, c: { elapsed: 1810 } }, 3000);
+  assert.deepEqual(out.ranked.map((row) => row.id), ['a', 'b', 'c']);
+  assert.equal(out.ranked[0].delta, 15);
+  assert.equal(out.sips.a, 0);
   assert.equal(out.sips.c, 2);
 });

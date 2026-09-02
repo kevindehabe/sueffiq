@@ -100,14 +100,15 @@ test.before(async () => {
   assert.equal(h.minigameSelection, true);
   assert.equal(h.pong, true);
   assert.equal(h.blackjack, true);
+  assert.equal(h.blindTimer, true);
   assert.equal(h.allDrawRanking, true);
 });
 
 test.after(async () => { if (child && !child.killed) child.kill('SIGTERM'); await sleep(180); });
 
-test('lobby exposes seven selectable minigames and first minigame is guaranteed drawing', async () => {
+test('lobby exposes eight selectable minigames and first minigame is guaranteed drawing', async () => {
   const { host, guest, state } = await roomWithGuest('Draw');
-  assert.deepEqual(state.selectedMiniTypes, ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'pong', 'blackjack']);
+  assert.deepEqual(state.selectedMiniTypes, ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'pong', 'blackjack']);
   for (const key of state.selectedMiniTypes) assert.equal(typeof state.miniTypes[key], 'string');
   let s = await onlyCategory(host, state, 'minigame');
   host.send({ t: 'start' });
@@ -134,6 +135,32 @@ test('individual minigame selection can isolate Blackjack and both players can f
   if (hq.current.blackjack.done && gq.current.blackjack.done) host.send({ t: 'blackjackStand' });
   const result = await host.state((x) => x.phase === 'results' && x.result?.miniType === 'blackjack', 8000);
   assert.equal(result.result.miniRows.length, 2);
+  await cleanup(host, guest);
+});
+
+test('Zeitgefühl uses a random hidden target and server-measured start/stop', async () => {
+  const { host, guest, state } = await roomWithGuest('Timer');
+  let s = await onlyCategory(host, state, 'minigame');
+  s = await onlyMini(host, s, 'zeitgefuehl');
+  host.send({ t: 'start' });
+  const hq = await host.state((x) => x.phase === 'question' && x.current?.miniType === 'zeitgefuehl');
+  const gq = await guest.state((x) => x.phase === 'question' && x.current?.miniType === 'zeitgefuehl');
+  assert.equal(hq.current.timerTargetMs, gq.current.timerTargetMs);
+  assert.ok(hq.current.timerTargetMs >= 2000 && hq.current.timerTargetMs <= 10000);
+  assert.equal(hq.current.timerTargetMs % 1000, 0);
+  assert.equal(hq.current.timerStarted, false);
+  assert.equal(hq.current.elapsed, undefined);
+
+  host.send({ t: 'miniTimerStart' });
+  guest.send({ t: 'miniTimerStart' });
+  await host.state((x) => x.phase === 'question' && x.current?.timerStarted);
+  await guest.state((x) => x.phase === 'question' && x.current?.timerStarted);
+  host.send({ t: 'miniTimerStop' });
+  guest.send({ t: 'miniTimerStop' });
+  const result = await host.state((x) => x.phase === 'results' && x.result?.miniType === 'zeitgefuehl');
+  assert.equal(result.result.answer, `${hq.current.timerTargetMs / 1000} Sekunden`);
+  assert.equal(result.result.miniRows.length, 2);
+  assert.ok(result.result.miniRows.every((row) => /s · [−+]\d+\.\d{2} s$/.test(row.label)));
   await cleanup(host, guest);
 });
 
@@ -189,4 +216,7 @@ test('generated mobile UI contains colored memory buttons and all new minigame c
   assert.match(html, /allDrawRank/);
   assert.match(html, /pongCanvas/);
   assert.match(html, /blackjackHit/);
+  assert.match(html, /blindTimerAction/);
+  assert.match(html, /Zeitgefühl/);
+  assert.match(html, /laufende Zeit bleibt komplett unsichtbar/);
 });

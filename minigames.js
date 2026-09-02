@@ -15,7 +15,7 @@ const DRAW_PROMPTS = [
 ];
 
 // Reihenfolge ist gleichzeitig die Standardauswahl in der Lobby.
-const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'pong', 'blackjack'];
+const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'pong', 'blackjack'];
 const COLOR_NAMES = ['Lila', 'Grün', 'Orange', 'Blau'];
 
 function randomSequence(length = 6) {
@@ -73,6 +73,24 @@ function memoryResults(scores, length) {
   return { ranked: rows, sips };
 }
 
+function blindTimerResults(results, targetMs) {
+  const target = Math.max(1, Number(targetMs) || 3000);
+  const rows = Object.entries(results || {}).map(([id, item]) => {
+    const raw = item && item.elapsed;
+    const elapsed = Number.isFinite(Number(raw)) && raw !== null ? Math.max(0, Number(raw)) : null;
+    return { id, elapsed, delta: elapsed === null ? Infinity : Math.abs(elapsed - target) };
+  }).sort((a, b) => a.delta - b.delta || (a.elapsed ?? Infinity) - (b.elapsed ?? Infinity) || a.id.localeCompare(b.id));
+  const valid = rows.filter((row) => Number.isFinite(row.delta));
+  const rankedSips = gentleRankSips(valid.map((row) => ({ id: row.id, value: row.delta })));
+  const sips = {};
+  rows.forEach((row, index) => {
+    if (!Number.isFinite(row.delta)) { sips[row.id] = 2; return; }
+    if (index > 0 && row.delta === rows[index - 1].delta) sips[row.id] = sips[rows[index - 1].id];
+    else sips[row.id] = rankedSips[row.id] || 0;
+  });
+  return { ranked: rows, sips };
+}
+
 module.exports = {
   DRAW_PROMPTS,
   MINI_TYPES,
@@ -81,5 +99,6 @@ module.exports = {
   reactionResults,
   tapResults,
   memoryResults,
+  blindTimerResults,
   gentleRankSips,
 };

@@ -30,7 +30,7 @@ module.exports = function tuneDrawTiming(html) {
 .rating-btn{height:46px;border:1px solid var(--line);border-radius:11px;background:#21162c;color:#6d6079;font-size:25px;font-weight:1000;line-height:1}
 .rating-btn.selected{background:rgba(184,255,74,.13);border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
 .rating-btn:disabled{opacity:.72}.rating-hint{text-align:center;color:var(--muted);font-size:11px;font-weight:800;margin:2px 0 8px}.rating-local-status{text-align:center;font-size:12px;font-weight:900;color:var(--accent)}
-.rgb-tools{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;padding:4px 0}.rgb-preset{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.28);padding:0;box-shadow:0 2px 8px rgba(0,0,0,.18)}.rgb-preset.active{outline:3px solid #fff;outline-offset:2px}.rgb-picker-wrap{width:42px;height:42px;border-radius:50%;padding:3px;background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.22)}.rgb-picker{width:32px;height:32px;border:0;padding:0;border-radius:50%;overflow:hidden;background:transparent}.rgb-picker::-webkit-color-swatch-wrapper{padding:0}.rgb-picker::-webkit-color-swatch{border:2px solid #fff;border-radius:50%}.rgb-label{width:100%;text-align:center;color:var(--muted);font-size:10px;font-weight:850}
+.rgb-tools{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;padding:4px 0}.rgb-preset{width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.28);padding:0;box-shadow:0 2px 8px rgba(0,0,0,.18)}.rgb-preset.active{outline:3px solid #fff;outline-offset:2px}.rgb-picker-wrap{width:42px;height:42px;border-radius:50%;padding:3px;background:conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.22)}.rgb-picker{width:32px;height:32px;border:0;padding:0;border-radius:50%;overflow:hidden;background:transparent}.rgb-picker::-webkit-color-swatch-wrapper{padding:0}.rgb-picker::-webkit-color-swatch{border:2px solid #fff;border-radius:50%}.rgb-label{width:100%;text-align:center;color:var(--muted);font-size:10px;font-weight:850}.draw-eraser{height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#f7f7f7;color:#21162c;font-size:11px;font-weight:950;box-shadow:0 2px 8px rgba(0,0,0,.18)}.draw-eraser.active{outline:3px solid var(--accent);outline-offset:2px}
 </style>`, 'Rating-und-RGB-Styles');
 
   const anchor = "try{joined=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){joined=null;}";
@@ -41,22 +41,23 @@ function strokeCssColor(value){
   if(typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value))return value;
   var colors=['#171717','#8f5cff','#78b92f','#ff5f74'];return colors[Number(value)||0]||colors[0];
 }
-paintStroke=function(s){if(!drawCtx||!drawCanvas||!s||s.length<5)return;drawCtx.strokeStyle=strokeCssColor(s[4]);drawCtx.lineWidth=Math.max(4,drawCanvas.width*.012);drawCtx.lineCap='round';drawCtx.lineJoin='round';drawCtx.beginPath();drawCtx.moveTo(Number(s[0])*drawCanvas.width,Number(s[1])*drawCanvas.height);drawCtx.lineTo(Number(s[2])*drawCanvas.width,Number(s[3])*drawCanvas.height);drawCtx.stroke();};
-paintOn=function(canvas,ctx,s){if(!canvas||!ctx||!s||s.length<5)return;ctx.strokeStyle=strokeCssColor(s[4]);ctx.lineWidth=Math.max(3,canvas.width*.012);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(Number(s[0])*canvas.width,Number(s[1])*canvas.height);ctx.lineTo(Number(s[2])*canvas.width,Number(s[3])*canvas.height);ctx.stroke();};
+paintStroke=function(s){if(!drawCtx||!drawCanvas||!s||s.length<5)return;var color=strokeCssColor(s[4]);drawCtx.strokeStyle=color;drawCtx.lineWidth=color==='#ffffff'?Math.max(14,drawCanvas.width*.035):Math.max(4,drawCanvas.width*.012);drawCtx.lineCap='round';drawCtx.lineJoin='round';drawCtx.beginPath();drawCtx.moveTo(Number(s[0])*drawCanvas.width,Number(s[1])*drawCanvas.height);drawCtx.lineTo(Number(s[2])*drawCanvas.width,Number(s[3])*drawCanvas.height);drawCtx.stroke();};
+paintOn=function(canvas,ctx,s){if(!canvas||!ctx||!s||s.length<5)return;var color=strokeCssColor(s[4]);ctx.strokeStyle=color;ctx.lineWidth=color==='#ffffff'?Math.max(12,canvas.width*.035):Math.max(3,canvas.width*.012);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(Number(s[0])*canvas.width,Number(s[1])*canvas.height);ctx.lineTo(Number(s[2])*canvas.width,Number(s[3])*canvas.height);ctx.stroke();};
 
 function rgbPaletteHtml(){
   var colors=['#171717','#ffffff','#ff3b30','#ff9500','#ffcc00','#34c759','#00c7be','#0a84ff','#5856d6','#af52de','#ff2d55','#8e5a2b'];
-  var out='<div class="rgb-tools"><div class="rgb-label">Farbe wählen</div>';
+  var out='<div class="rgb-tools"><div class="rgb-label">Farbe oder Radierer wählen</div>';
   for(var i=0;i<colors.length;i++)out+='<button type="button" class="rgb-preset" data-rgb="'+colors[i]+'" style="background:'+colors[i]+'" aria-label="Farbe '+colors[i]+'"></button>';
-  out+='<label class="rgb-picker-wrap" title="Eigene Farbe"><input id="drawRgbPicker" class="rgb-picker" type="color" value="#171717" aria-label="Eigene Farbe wählen"></label></div>';
+  out+='<label class="rgb-picker-wrap" title="Eigene Farbe"><input id="drawRgbPicker" class="rgb-picker" type="color" value="#171717" aria-label="Eigene Farbe wählen"></label><button type="button" id="drawEraser" class="draw-eraser" aria-label="Radierer">⌫ Radierer</button></div>';
   return out;
 }
 function injectRgbPalette(out){return out.replace('<div class="draw-tools">',rgbPaletteHtml()+'<div class="draw-tools">');}
 function setupRgbPicker(){
-  var presets=document.querySelectorAll('.rgb-preset'),picker=document.getElementById('drawRgbPicker');
-  function choose(color,button){drawColor=String(color||'#171717').toLowerCase();for(var i=0;i<presets.length;i++)presets[i].classList.toggle('active',presets[i]===button);if(picker&&/^#[0-9a-f]{6}$/i.test(drawColor))picker.value=drawColor;}
+  var presets=document.querySelectorAll('.rgb-preset'),picker=document.getElementById('drawRgbPicker'),eraser=document.getElementById('drawEraser');
+  function choose(color,button){drawColor=String(color||'#171717').toLowerCase();for(var i=0;i<presets.length;i++)presets[i].classList.toggle('active',presets[i]===button);if(eraser)eraser.classList.toggle('active',button===eraser);if(picker&&/^#[0-9a-f]{6}$/i.test(drawColor))picker.value=drawColor;}
   for(var i=0;i<presets.length;i++)presets[i].onclick=function(){choose(this.getAttribute('data-rgb'),this);};
   if(picker){picker.oninput=function(){choose(this.value,null);};picker.onchange=function(){choose(this.value,null);};}
+  if(eraser)eraser.onclick=function(){choose('#ffffff',eraser);};
 }
 
 var rgbBaseDrawMiniHtml=drawMiniHtml;

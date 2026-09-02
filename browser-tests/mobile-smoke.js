@@ -185,7 +185,7 @@ async function runBrowser(browserType, name) {
 (async () => {
   const child = spawn(process.execPath, ['server-v3.js'], {
     cwd: path.join(__dirname, '..'),
-    env: { ...process.env, PORT: String(PORT), SUEFFIQ_INTERNAL_PORT: String(INTERNAL_PORT) },
+    env: { ...process.env, PORT: String(PORT), SUEFFIQ_INTERNAL_PORT: String(INTERNAL_PORT), SUEFFIQ_DISABLE_RULES: 'true' },
     stdio: ['ignore', 'ignore', 'pipe'],
   });
   let stderr = '';
