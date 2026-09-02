@@ -59,7 +59,7 @@ async function onlyCategory(host, state, keep) {
 test.before(async () => {
   child = spawn(process.execPath, ['server-v3.js'], { cwd: path.join(__dirname, '..'), env: { ...process.env, PORT: String(PORT) }, stdio: 'ignore' });
   const h = await waitHealth();
-  assert.equal(h.version, '4.6.0');
+  assert.equal(h.version, '4.6.1');
   assert.equal(h.inviteLinks, true);
   assert.equal(h.masterTransfer, true);
 });
