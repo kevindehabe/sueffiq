@@ -97,7 +97,8 @@ const v48BasePatches = [
 ].join('\n');
 
 // server-v471 compiles server-v461. Insert extra base patches into server-v461 before it compiles server-v46.
-const compileAnchor = "const runtime = new Module(basePath, module.parent || module);";
+// Include the following runtime.filename line in the anchor so a quoted marker string cannot be matched accidentally.
+const compileAnchor = "const runtime = new Module(basePath, module.parent || module);\nruntime.filename = basePath;";
 const generatorPatch = [
   `const v48ExtraSource = ${JSON.stringify(v48BasePatches)};`,
   "const v48Marker = \"const runtimeAnchor = 'const runtime = new Module(basePath, module.parent || module);';\";",
