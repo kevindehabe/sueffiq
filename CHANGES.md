@@ -2,6 +2,9 @@
 
 ## Aktuell
 
+- 310 neue, deutlich frechere 18+-Karten über sieben soziale Kategorien ergänzt; der Standardmix spielt diese Party-Kategorien jetzt wesentlich häufiger aus.
+- Logo-Raten von 50 auf 125 Marken erweitert, inklusive Pornhub, xHamster, Brazzers, OnlyFans und weiterer bekannter Marken.
+- Zeichen-Synchronisierung verbindet übertragene Punkte lückenlos; Zuschauer und spätere „Alle malen“-Bewertungen sehen keine gestrichelten Lücken mehr.
 - Songvorschauen laufen über einen abgesicherten Same-Origin-Audiopfad und können auf Mobilgeräten direkt in der Songkarte freigeschaltet beziehungsweise synchron fortgesetzt werden.
 - Hausregeln erscheinen als synchronisierte Regelrunde. Erst nach der Bestätigung aller Spieler kann der Host fortfahren; anschließend bleibt die Regel oben angepinnt.
 - Die Zeichenpalette hat einen deutlich sichtbaren, breiteren Radierer erhalten.

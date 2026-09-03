@@ -174,7 +174,7 @@ test('Erkenne das Logo is a normal category with public wrong guesses and privat
   const hq = await host.state((x) => x.phase === 'question' && x.current?.type === 'logo');
   const gq = await guest.state((x) => x.phase === 'question' && x.current?.type === 'logo');
   assert.equal(hq.current.miniType, undefined);
-  assert.match(hq.current.logoImage, /^https:\/\/cdn\.simpleicons\.org\//);
+  assert.match(hq.current.logoImage, /^(?:https:\/\/cdn\.simpleicons\.org\/|data:image\/svg\+xml;charset=utf-8,)/);
   assert.equal(gq.current.logoImage, hq.current.logoImage);
   assert.equal(hq.current.answer, undefined);
   assert.equal(hq.current.logoName, undefined);

@@ -4,8 +4,9 @@ SüffIQ ist ein mobiles Multiplayer-Partyspiel für mehrere Handys. Ein Spieler 
 
 ## Enthalten
 
-- 13 wählbare Kategorien mit abwechslungsreicher Rotation
-- Ich hab noch nie – inklusive frecherem 18+-Mix
+- 14 wählbare Kategorien mit abwechslungsreicher Rotation
+- Mehr als 300 zusätzliche 18+-Karten über sieben soziale Kategorien
+- Standardrotation mit deutlich höherem Anteil an frechen Social- und 18+-Runden
 - Wahl: jede Stimme = 1 Schluck, maximal 5
 - Schätzfragen: beste Schätzung bleibt trocken, größere Abweichung bedeutet mehr Schlücke
 - Entweder oder
@@ -21,6 +22,8 @@ SüffIQ ist ein mobiles Multiplayer-Partyspiel für mehrere Handys. Ein Spieler 
 - Acht einzeln wählbare Minigames: Zeichnen & Raten, Alle malen, Reaktion, Tap Battle, Farbfolge, Zeitgefühl, Pong und Blackjack
 - Zufällige Hausregeln als eigene gemeinsame Regelrunde; nach Bestätigung aller Spieler pinnt der Host sie für höchstens zehn normale Runden oben an
 - Radierer und freie RGB-Farbauswahl in beiden Zeichenmodi
+- Lückenlose Live-Übertragung durchgezogener Linien an alle Mitspieler
+- „Erkenne das Logo“ mit 125 Marken, inklusive frechem 18+-Mix
 - Beitritt auch während einer laufenden Runde
 - Automatische Auswertung bei vollständigen Antworten oder Ablauf des Timers
 - Roundmaster kann an einen anderen verbundenen Spieler übergeben werden

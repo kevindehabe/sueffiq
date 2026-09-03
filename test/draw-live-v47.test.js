@@ -124,6 +124,10 @@ test('generated UI contains RGB picker, star ratings and one-point Pong copy', a
   assert.match(html, /id=\"drawEraser\"/);
   assert.match(html, /⌫ Radierer/);
   assert.match(html, /color==='#ffffff'/);
+  assert.match(html, /drawSentPoint/);
+  assert.match(html, /t:'drawStroke',s:\[drawSentPoint\.x,drawSentPoint\.y,p\.x,p\.y,drawColor\]/);
+  assert.match(html, /t:'allDrawStroke',s:\[drawSentPoint\.x,drawSentPoint\.y,p\.x,p\.y,drawColor\]/);
+  assert.match(html, /onpointerup=function\(e\).*sendPending\(p\)/s);
   assert.match(html, /rating-btn/);
   assert.match(html, /automatisch gespeichert|automatisch gespeichert|automatisch gespeichert/i);
   assert.match(html, /Ein Punkt entscheidet/);

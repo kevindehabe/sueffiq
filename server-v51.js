@@ -168,9 +168,9 @@ const logoCategoryNew = `  minigame: 'Minigames',
   logo: 'Erkenne das Logo',
 };`;
 const logoDeckOld = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame', 'minigame']`;
-const logoDeckNew = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', 'logo', social, 'oder', adult, group, 'minigame', 'minigame', 'minigame']`;
+const logoDeckNew = `    deck = ['schaetz', 'trivia', 'person', 'bild', 'song', 'logo', social, social, 'oder', 'oder', adult, adult, group, group, 'minigame', 'minigame', 'minigame']`;
 const logoWeightsOld = `    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };`;
-const logoWeightsNew = `    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, logo: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };`;
+const logoWeightsNew = `    const customWeights = { minigame: 5, wahl: 5, nie: 5, wahrheit: 5, pflicht: 5, oder: 4, mehrheit: 4, skala: 4, schaetz: 3, trivia: 3, song: 3, person: 2, bild: 2, logo: 2 };`;
 const logoAnsweredOld = `    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];`;
 const logoAnsweredNew = `    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];
     else if (cur.type === 'logo') answered = !!cur.logoCorrect?.[id];`;
