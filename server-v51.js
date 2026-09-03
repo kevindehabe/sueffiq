@@ -45,6 +45,8 @@ const miniPublicNew = `    if (cur.miniType === 'farbfolge') { base.sequence = c
       base.logoSolved = !!cur.logoCorrect?.[forId];
       base.logoSolvedCount = connectedIds(room).filter((id) => !!cur.logoCorrect?.[id]).length;
       base.logoTotal = connectedIds(room).length;
+      base.guessFeed = (cur.guessFeed || []).slice(-20);
+      base.yourStatus = cur.logoCorrect?.[forId] ? { status: 'correct' } : cur.logoNear?.[forId] ? { status: 'near' } : null;
     }`;
 
 const memoryResultOld = `    if (cur.miniType === 'farbfolge') {
@@ -106,6 +108,8 @@ const startTimerNew = `    if (cur.miniType === 'farbfolge') { total = 15; cur.t
       cur.logoStartedAt = now;
       cur.logoCorrect = {};
       cur.logoAttempts = {};
+      cur.logoNear = {};
+      cur.guessFeed = [];
     }
     if (cur.miniType === 'pong') {`;
 
@@ -134,10 +138,18 @@ const timerHandlerNew = `    if (msg.t === 'miniTimerStart' && room.phase === 'q
       const match = matchLogoGuess(cur.logo, guess);
       if (match.status === 'correct') {
         cur.logoCorrect[me] = clamp(Date.now() - Number(cur.logoStartedAt || Date.now()), 1, 60000);
-        send(room.players[me].ws, { t: 'guessFeedback', status: 'correct', m: 'Richtig! Logo erkannt.' });
-        if (allAnswered(room)) finishRound(room, 'complete'); else broadcast(room);
-      } else if (match.status === 'near') send(room.players[me].ws, { t: 'guessFeedback', status: 'near', m: 'Fast – sehr nah dran.' });
-      else send(room.players[me].ws, { t: 'guessFeedback', status: 'wrong', m: 'Noch nicht. Weiter raten!' });
+        cur.logoNear[me] = false;
+        send(room.players[me].ws, { t: 'guessFeedback', status: 'correct', m: 'Richtig! Dein Tipp bleibt geheim.' });
+      } else if (match.status === 'near') {
+        cur.logoNear[me] = true;
+        send(room.players[me].ws, { t: 'guessFeedback', status: 'near', m: 'Sehr nah dran – bleibt privat.' });
+      } else {
+        cur.logoNear[me] = false;
+        cur.guessFeed.push({ name: displayName(room, me), guess });
+        if (cur.guessFeed.length > 40) cur.guessFeed.shift();
+        send(room.players[me].ws, { t: 'guessFeedback', status: 'wrong', m: 'Falsch – dieser Tipp ist für alle sichtbar.' });
+      }
+      if (allAnswered(room)) finishRound(room, 'complete'); else broadcast(room);
       return;
     }
     if (msg.t === 'miniLogoBroken' && isHost && room.phase === 'question' && room.current?.type === 'minigame' && room.current.miniType === 'logo') {
