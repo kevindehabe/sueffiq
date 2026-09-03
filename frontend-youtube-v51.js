@@ -49,6 +49,26 @@ module.exports = function tuneYouTubeTimerV51(html) {
     'YouTube auf Landing vorladen'
   );
 
+  // Der persistente YouTube-Player kann bereits bereit sein, bevor die Songrunde gerendert
+  // wird. Deshalb den sichtbaren Host-Button aus dem echten Player-/Rundenstatus ableiten,
+  // statt den statischen Text „Song wird geladen …“ stehen zu lassen.
+  html = mustReplace(
+    html,
+    "var play=document.getElementById('songPlay');if(play){play.disabled=!ytPlayerReady;play.onclick=playSongButton;}",
+    "var play=document.getElementById('songPlay');if(play){var running=!!(state&&state.current&&state.current.type==='song'&&state.current.songStartedAt);play.disabled=running||!ytPlayerReady;play.textContent=running?'🎵 Song läuft':(ytPlayerReady?'▶ Song starten':'▶ Song wird geladen …');play.onclick=playSongButton;}",
+    'Song-Button Status beim Rendern'
+  );
+  const readyButtonOld = "if(pb){pb.disabled=false;pb.textContent='▶ Song starten';}";
+  const readyButtonNew = "if(pb){var running=!!(state&&state.current&&state.current.type==='song'&&state.current.songStartedAt);pb.disabled=running;pb.textContent=running?'🎵 Song läuft':'▶ Song starten';}";
+  if (!html.includes(readyButtonOld)) throw new Error('v5.1 Frontend-Patch fehlt: Song-Button bei YouTube-Ready');
+  html = html.split(readyButtonOld).join(readyButtonNew);
+  html = mustReplace(
+    html,
+    "playSyncedSong=function(m,force){var cur=state&&state.current;if(!cur||cur.type!=='song')return;",
+    "playSyncedSong=function(m,force){var cur=state&&state.current;if(!cur||cur.type!=='song')return;var pb=document.getElementById('songPlay');if(pb){pb.disabled=true;pb.textContent='🎵 Song läuft';}",
+    'Song-Button beim synchronen Start'
+  );
+
   html = mustReplace(html, '</style>', `
 .blind-timer-shell{display:grid;gap:14px;text-align:center}.blind-timer-target{display:grid;gap:2px;margin:2px auto 0;padding:12px 18px;border-radius:16px;background:rgba(184,255,74,.08);border:1px solid rgba(184,255,74,.22)}.blind-timer-target span{color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.blind-timer-target strong{color:var(--accent);font-size:31px;line-height:1.05}
 .blind-timer-face{width:min(220px,58vw);aspect-ratio:1;margin:2px auto;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(143,92,255,.13),rgba(17,11,25,.96) 68%);border:2px solid rgba(143,92,255,.3);box-shadow:inset 0 0 0 9px rgba(255,255,255,.018),0 14px 40px rgba(0,0,0,.28)}.blind-timer-face span{font-size:52px;font-weight:1000;color:#d8caff}.blind-timer-face.running{border-color:rgba(184,255,74,.42);box-shadow:inset 0 0 0 9px rgba(184,255,74,.025),0 14px 40px rgba(0,0,0,.28)}.blind-timer-face.running span{color:var(--accent)}
