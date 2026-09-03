@@ -250,6 +250,6 @@ test('generated mobile UI contains the minigame controls plus the normal logo ca
   assert.match(html, /Während er läuft siehst du keine Zeit/);
   assert.match(html, /logoGameImage/);
   assert.match(html, /Marke eingeben/);
-  assert.match(html, /Erkenne das Logo/);
+  assert.match(html, /function logoRoundHtml/);
   assert.match(html, /goMainMenu/);
 });
