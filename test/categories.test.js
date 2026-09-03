@@ -83,8 +83,9 @@ test('every selectable category can be scheduled', async () => {
   await host.wait((m) => m.t === 'joined');
   let s = await host.state((x) => x.phase === 'lobby');
   const categories = Object.keys(s.cats);
-  assert.equal(categories.length, 13);
+  assert.equal(categories.length, 14);
   assert.ok(categories.includes('minigame'));
+  assert.equal(s.cats.logo, 'Erkenne das Logo');
 
   for (const cat of categories) {
     s = await setOnly(host, s, cat);
