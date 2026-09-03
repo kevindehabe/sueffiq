@@ -102,14 +102,16 @@ test.before(async () => {
   assert.equal(h.blackjack, true);
   assert.equal(h.blindTimer, true);
   assert.equal(h.logoGame, true);
+  assert.equal(h.logoCategory, true);
   assert.equal(h.allDrawRanking, true);
 });
 
 test.after(async () => { if (child && !child.killed) child.kill('SIGTERM'); await sleep(180); });
 
-test('lobby exposes nine selectable minigames and first minigame is guaranteed drawing', async () => {
+test('lobby exposes eight selectable minigames and first minigame is guaranteed drawing', async () => {
   const { host, guest, state } = await roomWithGuest('Draw');
-  assert.deepEqual(state.selectedMiniTypes, ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'logo', 'pong', 'blackjack']);
+  assert.deepEqual(state.selectedMiniTypes, ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'pong', 'blackjack']);
+  assert.equal(state.cats.logo, 'Erkenne das Logo');
   for (const key of state.selectedMiniTypes) assert.equal(typeof state.miniTypes[key], 'string');
   let s = await onlyCategory(host, state, 'minigame');
   host.send({ t: 'start' });
@@ -165,22 +167,28 @@ test('Zeitgefühl uses a random hidden target and server-measured start/stop', a
   await cleanup(host, guest);
 });
 
-test('Erkenne das Logo shows a wordless icon and accepts brand guesses', async () => {
+test('Erkenne das Logo is a normal category with public wrong guesses and private near/correct guesses', async () => {
   const { host, guest, state } = await roomWithGuest('Logo');
-  let s = await onlyCategory(host, state, 'minigame');
-  s = await onlyMini(host, s, 'logo');
+  await onlyCategory(host, state, 'logo');
   host.send({ t: 'start' });
-  const hq = await host.state((x) => x.phase === 'question' && x.current?.miniType === 'logo');
-  const gq = await guest.state((x) => x.phase === 'question' && x.current?.miniType === 'logo');
+  const hq = await host.state((x) => x.phase === 'question' && x.current?.type === 'logo');
+  const gq = await guest.state((x) => x.phase === 'question' && x.current?.type === 'logo');
+  assert.equal(hq.current.miniType, undefined);
   assert.match(hq.current.logoImage, /^https:\/\/cdn\.simpleicons\.org\//);
   assert.equal(gq.current.logoImage, hq.current.logoImage);
-  assert.equal(hq.current.logoSolved, false);
   assert.equal(hq.current.answer, undefined);
   assert.equal(hq.current.logoName, undefined);
+  assert.deepEqual(hq.current.guessFeed, []);
 
-  host.send({ t: 'miniLogoBroken' });
-  const result = await host.state((x) => x.phase === 'results' && x.result?.miniType === 'logo');
+  guest.send({ t: 'guess', v: 'definitiv falsch' });
+  const feed = await host.state((x) => x.phase === 'question' && x.current?.type === 'logo' && Array.isArray(x.current.guessFeed) && x.current.guessFeed.length === 1);
+  assert.equal(feed.current.guessFeed[0].name, 'LogoGast');
+  assert.equal(feed.current.guessFeed[0].guess, 'definitiv falsch');
+
+  host.send({ t: 'logoBroken' });
+  const result = await host.state((x) => x.phase === 'results' && x.result?.type === 'logo');
   assert.equal(typeof result.result.answer, 'string');
+  assert.equal(result.result.miniType, undefined);
   assert.match(result.result.lines.join(' '), /ohne Strafe/);
   await cleanup(host, guest);
 });
@@ -230,7 +238,7 @@ test('Pong assigns exactly two opponents and accepts independent paddle movement
   await cleanup(host, guest);
 });
 
-test('generated mobile UI contains colored memory buttons and all new minigame controls', async () => {
+test('generated mobile UI contains the minigame controls plus the normal logo category UI', async () => {
   const html = await (await fetch(`${HTTP}/`)).text();
   assert.match(html, /memory-btn\[data-mc="0"\]/);
   assert.match(html, /toggleMini/);
@@ -240,6 +248,8 @@ test('generated mobile UI contains colored memory buttons and all new minigame c
   assert.match(html, /blindTimerAction/);
   assert.match(html, /Zeitgefühl/);
   assert.match(html, /Während er läuft siehst du keine Zeit/);
-  assert.match(html, /logoGuessInput/);
+  assert.match(html, /logoGameImage/);
+  assert.match(html, /Marke eingeben/);
   assert.match(html, /Erkenne das Logo/);
+  assert.match(html, /goMainMenu/);
 });
