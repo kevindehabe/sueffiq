@@ -167,8 +167,8 @@ const logoCategoryOld = `  minigame: 'Minigames',
 const logoCategoryNew = `  minigame: 'Minigames',
   logo: 'Erkenne das Logo',
 };`;
-const logoDeckOld = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame']`;
-const logoDeckNew = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', 'logo', social, 'oder', adult, group, 'minigame', 'minigame']`;
+const logoDeckOld = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', social, 'oder', adult, group, 'minigame', 'minigame', 'minigame']`;
+const logoDeckNew = `    deck = ['schaetz', 'schaetz', 'trivia', 'person', 'bild', 'song', 'logo', social, 'oder', adult, group, 'minigame', 'minigame', 'minigame']`;
 const logoWeightsOld = `    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };`;
 const logoWeightsNew = `    const customWeights = { schaetz: 5, minigame: 5, wahl: 3, trivia: 3, song: 3, person: 2, bild: 2, logo: 2, nie: 2, mehrheit: 2, skala: 2, oder: 2, wahrheit: 2, pflicht: 2 };`;
 const logoAnsweredOld = `    else if (cur.type === 'song') answered = !!cur.songCorrect?.[id];`;
@@ -187,12 +187,12 @@ const logoPublicNew = `  if (cur.type === 'logo') {
 const logoAllAnsweredOld = `  if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;`;
 const logoAllAnsweredNew = `  if (cur.type === 'logo') return ids.every((id) => !!cur.logoCorrect?.[id]);
   if (cur.type === 'wahrheit' || cur.type === 'pflicht') return cur.answers[cur.target] !== undefined;`;
-const logoStartOld = `  cur.deadline = Date.now() + total * 1000; room.current = cur; room.phase = 'question'; scheduleRound(room); broadcast(room);`;
+const logoStartOld = `  cur.deadline = (type === 'minigame' && cur.miniType === 'taps') ? null : Date.now() + total * 1000;`;
 const logoStartNew = `  if (type === 'logo') {
     total = 25; cur.total = total; cur.text = 'Erkenne das Logo.'; cur.logo = pickLogoPrompt(room); cur.logoStartedAt = Date.now();
     cur.logoCorrect = {}; cur.logoNear = {}; cur.logoAttempts = {}; cur.guessFeed = [];
   }
-  cur.deadline = Date.now() + total * 1000; room.current = cur; room.phase = 'question'; scheduleRound(room); broadcast(room);`;
+  cur.deadline = (type === 'minigame' && cur.miniType === 'taps') ? null : Date.now() + total * 1000;`;
 const logoGuessGuardOld = `  const cur = room.current; if (!cur || room.phase !== 'question' || !['person', 'bild', 'song'].includes(cur.type)) return;`;
 const logoGuessGuardNew = `  const cur = room.current; if (!cur || room.phase !== 'question' || !['person', 'bild', 'song', 'logo'].includes(cur.type)) return;`;
 const logoGuessBranchOld = `  } else {
