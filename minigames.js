@@ -15,7 +15,8 @@ const DRAW_PROMPTS = [
 ];
 
 // Reihenfolge ist gleichzeitig die Standardauswahl in der Lobby.
-const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'logo', 'pong', 'blackjack'];
+// Logo-Raten ist eine normale Spielkategorie und gehört deshalb nicht hier hinein.
+const MINI_TYPES = ['zeichnen', 'allemalen', 'reaktion', 'taps', 'farbfolge', 'zeitgefuehl', 'pong', 'blackjack'];
 const COLOR_NAMES = ['Lila', 'Grün', 'Orange', 'Blau'];
 
 function randomSequence(length = 6) {
