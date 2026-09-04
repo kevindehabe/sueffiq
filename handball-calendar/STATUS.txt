@@ -1,0 +1,1 @@
+Automatic HCME calendar updater configured. Feed: https://raw.githubusercontent.com/kevindehabe/sueffiq/main/handball-calendar/hcme.ics
