@@ -1,15 +1,14 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//OpenAI//HC Metter-Enz Spielplan 2026-27//DE
+PRODID:-//HC Metter-Enz//H4A Auto Calendar//DE
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:HC Metter-Enz 2026/27
-X-WR-CALDESC:Männer Bezirksliga Gruppe 1 - Saison 2026/2027
 BEGIN:VEVENT
 UID:9448571@handball4all.de
 DTSTART;TZID=Europe/Berlin:20260919T200000
 DTEND;TZID=Europe/Berlin:20260919T220000
-SUMMARY:HC Metter-Enz – TSV Oberriexingen 1900
+SUMMARY:HC Metter-Enz – TSV Oberriex.
 LOCATION:Kaltensteinhalle\, Alter Postweg 10\, 71665 Vaihingen/Enz
 DESCRIPTION:Spielnummer 100135
 END:VEVENT
@@ -25,7 +24,7 @@ BEGIN:VEVENT
 UID:9448631@handball4all.de
 DTSTART;TZID=Europe/Berlin:20261010T153000
 DTEND;TZID=Europe/Berlin:20261010T173000
-SUMMARY:HSG Marbach-Rielingshausen – HC Metter-Enz
+SUMMARY:HSG Marb/Riel – HC Metter-Enz
 LOCATION:Hardtwaldhalle\, Am Hardtwald\, 71672 Marbach-Rielingshausen
 DESCRIPTION:Spielnummer 100147
 END:VEVENT
@@ -33,7 +32,7 @@ BEGIN:VEVENT
 UID:9448651@handball4all.de
 DTSTART;TZID=Europe/Berlin:20261017T200000
 DTEND;TZID=Europe/Berlin:20261017T220000
-SUMMARY:HC Metter-Enz – SG BBM Bietigheim 4
+SUMMARY:HC Metter-Enz – BBM Bietigheim 4
 LOCATION:Kaltensteinhalle\, Alter Postweg 10\, 71665 Vaihingen/Enz
 DESCRIPTION:Spielnummer 100151
 END:VEVENT
@@ -65,7 +64,7 @@ BEGIN:VEVENT
 UID:9448766@handball4all.de
 DTSTART;TZID=Europe/Berlin:20261121T200000
 DTEND;TZID=Europe/Berlin:20261121T220000
-SUMMARY:HC Metter-Enz – Handballregion Bottwar SG 3
+SUMMARY:HC Metter-Enz – Bottwar SG 3
 LOCATION:Sporthalle Großsachsenheim\, Oberriexingerstraße 33-35\, 74343 Sachsenheim-Großsachsenheim
 DESCRIPTION:Spielnummer 100174
 END:VEVENT
@@ -73,7 +72,7 @@ BEGIN:VEVENT
 UID:9448771@handball4all.de
 DTSTART;TZID=Europe/Berlin:20261128T180000
 DTEND;TZID=Europe/Berlin:20261128T200000
-SUMMARY:SG Schozach-Bottwartal 3 – HC Metter-Enz
+SUMMARY:SG SchoBott 3 – HC Metter-Enz
 LOCATION:Langhanshalle\, Albert-Einstein-Straße 20\, 71717 Beilstein
 DESCRIPTION:Spielnummer 100175
 END:VEVENT
@@ -81,7 +80,7 @@ BEGIN:VEVENT
 UID:9448816@handball4all.de
 DTSTART;TZID=Europe/Berlin:20261212T160000
 DTEND;TZID=Europe/Berlin:20261212T180000
-SUMMARY:SV Salamander Kornwestheim 1894 3 – HC Metter-Enz
+SUMMARY:SV K'westheim 3 – HC Metter-Enz
 LOCATION:Sporthalle Ost\, Theodor-Heuss-Straße 6\, 70806 Kornwestheim
 DESCRIPTION:Spielnummer 100184
 END:VEVENT
@@ -89,7 +88,7 @@ BEGIN:VEVENT
 UID:9449046@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270109T200000
 DTEND;TZID=Europe/Berlin:20270109T220000
-SUMMARY:HC Metter-Enz – SG Schozach-Bottwartal 3
+SUMMARY:HC Metter-Enz – SG SchoBott 3
 LOCATION:Kaltensteinhalle\, Alter Postweg 10\, 71665 Vaihingen/Enz
 DESCRIPTION:Spielnummer 100230
 END:VEVENT
@@ -105,7 +104,7 @@ BEGIN:VEVENT
 UID:9448846@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270131T133000
 DTEND;TZID=Europe/Berlin:20270131T153000
-SUMMARY:TSV Oberriexingen 1900 – HC Metter-Enz
+SUMMARY:TSV Oberriex. – HC Metter-Enz
 LOCATION:Sporthalle\, Mühlstraße 25\, 71739 Oberriexingen
 DESCRIPTION:Spielnummer 100190
 END:VEVENT
@@ -113,7 +112,7 @@ BEGIN:VEVENT
 UID:9448906@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270220T200000
 DTEND;TZID=Europe/Berlin:20270220T220000
-SUMMARY:HC Metter-Enz – HSG Marbach-Rielingshausen
+SUMMARY:HC Metter-Enz – HSG Marb/Riel
 LOCATION:Kaltensteinhalle\, Alter Postweg 10\, 71665 Vaihingen/Enz
 DESCRIPTION:Spielnummer 100202
 END:VEVENT
@@ -121,7 +120,7 @@ BEGIN:VEVENT
 UID:9448926@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270228T180000
 DTEND;TZID=Europe/Berlin:20270228T200000
-SUMMARY:SG BBM Bietigheim 4 – HC Metter-Enz
+SUMMARY:BBM Bietigheim 4 – HC Metter-Enz
 LOCATION:Sporthalle am Viadukt\, Holzgartenstraße 28\, 74321 Bietigheim-Bissingen
 DESCRIPTION:Spielnummer 100206
 END:VEVENT
@@ -153,7 +152,7 @@ BEGIN:VEVENT
 UID:9449041@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270410T160000
 DTEND;TZID=Europe/Berlin:20270410T180000
-SUMMARY:Handballregion Bottwar SG 3 – HC Metter-Enz
+SUMMARY:Bottwar SG 3 – HC Metter-Enz
 LOCATION:Sporthalle In den Bäderwiesen\, Dürrenstraße 1\, 71720 Oberstenfeld
 DESCRIPTION:Spielnummer 100229
 END:VEVENT
@@ -161,7 +160,7 @@ BEGIN:VEVENT
 UID:9449091@handball4all.de
 DTSTART;TZID=Europe/Berlin:20270417T200000
 DTEND;TZID=Europe/Berlin:20270417T220000
-SUMMARY:HC Metter-Enz – SV Salamander Kornwestheim 1894 3
+SUMMARY:HC Metter-Enz – SV K'westheim 3
 LOCATION:Sporthalle Großsachsenheim\, Oberriexingerstraße 33-35\, 74343 Sachsenheim-Großsachsenheim
 DESCRIPTION:Spielnummer 100239
 END:VEVENT
