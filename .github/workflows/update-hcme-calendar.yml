@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: '17 */2 * * *'
   workflow_dispatch:
+  push:
+    paths:
+      - 'handball-calendar/update.py'
+      - '.github/workflows/update-hcme-calendar.yml'
 
 permissions:
   contents: write
